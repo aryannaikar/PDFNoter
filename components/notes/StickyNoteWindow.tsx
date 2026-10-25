@@ -326,13 +326,19 @@ export function StickyNoteWindow({
 
             {/* Quoted highlight text if annotation */}
             {selectedText && (
-              <div className="p-2 bg-amber-200/40 border-l-3 border-amber-500 rounded-r-xs text-xs text-amber-950 font-serif italic leading-snug">
+              <div className="p-2 bg-amber-200/50 border-l-3 border-amber-500 rounded-r-xs text-xs text-amber-950 font-serif italic whitespace-pre-wrap break-words leading-relaxed">
                 "{selectedText}"
               </div>
             )}
 
             {/* Note text content */}
-            <div className="text-xs text-amber-950 whitespace-pre-wrap leading-relaxed font-sans min-h-[4rem]">
+            <div
+              className={`text-xs text-amber-950 whitespace-pre-wrap break-words leading-relaxed min-h-[4rem] ${
+                title?.toLowerCase().includes('code') || /^(\s*#|\s*\/\/|\s*import |\s*def |\s*const |\s*let )/m.test(content)
+                  ? 'font-mono text-[11px] bg-amber-200/50 p-2.5 rounded border border-amber-300/70 my-1'
+                  : 'font-sans my-1'
+              }`}
+            >
               {content || <span className="text-amber-800/50 italic">Empty note</span>}
             </div>
 

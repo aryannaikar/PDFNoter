@@ -72,7 +72,7 @@ export function NoteCard({
       {/* Quote if annotation */}
       {selectedText && (
         <div className="px-3 pt-2.5">
-          <div className="px-2.5 py-1.5 bg-amber-200/40 border-l-3 border-amber-500 rounded-r-xs text-xs text-amber-950 italic font-serif line-clamp-3">
+          <div className="px-2.5 py-1.5 bg-amber-200/50 border-l-3 border-amber-500 rounded-r-xs text-xs text-amber-950 italic font-serif whitespace-pre-wrap break-words leading-relaxed">
             "{selectedText}"
           </div>
         </div>
@@ -80,9 +80,15 @@ export function NoteCard({
 
       {/* Content */}
       <div className="p-3">
-        <p className="text-xs text-amber-950 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto font-sans">
+        <div
+          className={`text-xs text-amber-950 whitespace-pre-wrap break-words leading-relaxed max-h-64 overflow-y-auto ${
+            title?.toLowerCase().includes('code') || /^(\s*#|\s*\/\/|\s*import |\s*def |\s*const |\s*let )/m.test(content)
+              ? 'font-mono text-[11px] bg-amber-200/50 p-2.5 rounded border border-amber-300/70 my-1'
+              : 'font-sans'
+          }`}
+        >
           {content || <span className="text-amber-800/50 italic">No note text written yet.</span>}
-        </p>
+        </div>
       </div>
 
       {/* Source URL if present */}

@@ -172,12 +172,18 @@ export function NotesDrawer({
                 )}
 
                 {selectedText && (
-                  <div className="mb-1.5 px-2 py-1 bg-amber-50/70 border-l-2 border-amber-300 rounded-xs text-[11px] text-amber-950 italic line-clamp-2">
+                  <div className="mb-2 px-2.5 py-1.5 bg-amber-50/90 border-l-3 border-amber-400 rounded-xs text-[11px] text-amber-950 italic whitespace-pre-wrap break-words font-serif">
                     "{selectedText}"
                   </div>
                 )}
 
-                <div className="text-xs text-neutral-600 line-clamp-3 leading-relaxed">
+                <div
+                  className={`text-xs text-neutral-800 whitespace-pre-wrap break-words leading-relaxed ${
+                    title?.toLowerCase().includes('code') || /^(\s*#|\s*\/\/|\s*import |\s*def |\s*const |\s*let )/m.test(content)
+                      ? 'font-mono text-[11px] bg-neutral-100/90 p-2.5 rounded-md border border-neutral-200/80 my-1.5'
+                      : 'font-sans my-1'
+                  }`}
+                >
                   {content}
                 </div>
 
