@@ -140,6 +140,26 @@ export function PdfReaderView({
         setPdfDoc(loadedDoc);
         setTotalPages(loadedDoc.numPages);
 
+        // Auto-fit scale on initial document open if no progress zoom was saved
+        try {
+          const progress = await storageService.getReadingProgress(documentRecord.id);
+          if (!progress?.zoom) {
+            const firstPage = await loadedDoc.getPage(1);
+            const vp1 = firstPage.getViewport({ scale: 1 });
+            const viewWidth = scrollContainerRef.current?.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 600);
+            const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+            const padding = isMobile ? 16 : 48;
+            const availableWidth = Math.max(260, viewWidth - padding);
+            const fitScale = Math.min(1.8, Math.max(0.3, availableWidth / vp1.width));
+            const rounded = Math.round(fitScale * 100) / 100;
+            setScale(rounded);
+          }
+        } catch {
+          if (typeof window !== 'undefined' && window.innerWidth < 640) {
+            setScale(0.55);
+          }
+        }
+
         // Update document page count in database if not set
         if (documentRecord.pageCount !== loadedDoc.numPages) {
           storageService.saveDocumentMetadata({
@@ -282,19 +302,25 @@ export function PdfReaderView({
 
   const handleZoomOut = () => {
     setScale((prev) => {
-      const next = Math.max(0.6, Math.round((prev - 0.15) * 100) / 100);
+      const next = Math.max(0.3, Math.round((prev - 0.15) * 100) / 100);
       scheduleSaveProgress(currentPage, next);
       return next;
     });
   };
 
   const handleFitWidth = () => {
-    if (scrollContainerRef.current) {
-      const containerWidth = scrollContainerRef.current.clientWidth - 48;
-      // Standard A4 page width is ~595pt at scale 1.0
-      const calculatedScale = Math.max(0.6, Math.min(2.0, containerWidth / 620));
-      setScale(calculatedScale);
-      scheduleSaveProgress(currentPage, calculatedScale);
+    if (pdfDoc) {
+      pdfDoc.getPage(1).then((page) => {
+        const vp1 = page.getViewport({ scale: 1 });
+        const viewWidth = scrollContainerRef.current?.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 600);
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+        const padding = isMobile ? 16 : 48;
+        const availableWidth = Math.max(260, viewWidth - padding);
+        const calculatedScale = Math.min(2.5, Math.max(0.3, availableWidth / vp1.width));
+        const rounded = Math.round(calculatedScale * 100) / 100;
+        setScale(rounded);
+        scheduleSaveProgress(currentPage, rounded);
+      }).catch(console.error);
     }
   };
 
@@ -480,7 +506,7 @@ export function PdfReaderView({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto overflow-x-auto relative px-2 sm:px-6 py-4 flex flex-col items-center"
+        className="flex-1 overflow-y-auto overflow-x-auto relative px-1 sm:px-6 py-2 sm:py-4 pb-20 sm:pb-6 flex flex-col items-center w-full"
       >
         {isLoadingPdf && (
           <div className="flex flex-col items-center justify-center my-auto py-24 text-neutral-500">

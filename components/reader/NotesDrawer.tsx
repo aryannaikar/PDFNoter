@@ -58,7 +58,13 @@ export function NotesDrawer({
   });
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-96 max-w-[90vw] bg-white shadow-2xl border-l border-neutral-200 flex flex-col animate-in slide-in-from-right duration-200">
+    <>
+      {/* Mobile backdrop */}
+      <div
+        className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 sm:hidden animate-in fade-in duration-150"
+        onClick={onClose}
+      />
+      <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-96 sm:max-w-[90vw] bg-white shadow-2xl border-l border-neutral-200 flex flex-col animate-in slide-in-from-right duration-200">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100 bg-neutral-50/70">
         <div className="flex items-center gap-2">
@@ -187,5 +193,6 @@ export function NotesDrawer({
         )}
       </div>
     </div>
+    </>
   );
 }

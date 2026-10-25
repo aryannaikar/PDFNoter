@@ -68,21 +68,30 @@ export function PageAnnotationLayer({
 
                 {/* Popover Card */}
                 {isOpen && (
-                  <div className="absolute right-0 top-8 z-50">
-                    <NoteCard
-                      item={note}
-                      isAnnotation={false}
-                      onEdit={() => {
+                  <>
+                    <div
+                      className="fixed inset-0 bg-black/30 backdrop-blur-2xs z-40 sm:hidden pointer-events-auto"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setActiveItemId(null);
-                        onEditNote(note);
                       }}
-                      onDelete={() => {
-                        setActiveItemId(null);
-                        onDeleteNote(note.id);
-                      }}
-                      onClose={() => setActiveItemId(null)}
                     />
-                  </div>
+                    <div className="fixed inset-x-3 bottom-16 sm:absolute sm:inset-auto sm:right-0 sm:top-8 z-50 pointer-events-auto flex justify-center">
+                      <NoteCard
+                        item={note}
+                        isAnnotation={false}
+                        onEdit={() => {
+                          setActiveItemId(null);
+                          onEditNote(note);
+                        }}
+                        onDelete={() => {
+                          setActiveItemId(null);
+                          onDeleteNote(note.id);
+                        }}
+                        onClose={() => setActiveItemId(null)}
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             );
@@ -154,28 +163,42 @@ export function PageAnnotationLayer({
 
                 {/* Popover Card */}
                 {isOpen && (
-                  <div
-                    className="absolute z-50 mt-1"
-                    style={{
-                      left: primaryRect.left > pageWidth / 2 ? 'auto' : '0',
-                      right: primaryRect.left > pageWidth / 2 ? '0' : 'auto',
-                    }}
-                  >
-                    <NoteCard
-                      item={ann}
-                      isAnnotation={true}
-                      anchorWarning={verification.warning}
-                      onEdit={() => {
+                  <>
+                    <div
+                      className="fixed inset-0 bg-black/30 backdrop-blur-2xs z-40 sm:hidden pointer-events-auto"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setActiveItemId(null);
-                        onEditAnnotation(ann);
                       }}
-                      onDelete={() => {
-                        setActiveItemId(null);
-                        onDeleteAnnotation(ann.id);
-                      }}
-                      onClose={() => setActiveItemId(null)}
                     />
-                  </div>
+                    <div
+                      className="fixed inset-x-3 bottom-16 sm:absolute sm:inset-auto z-50 pointer-events-auto flex justify-center"
+                      style={
+                        typeof window !== 'undefined' && window.innerWidth < 640
+                          ? undefined
+                          : {
+                              left: primaryRect.left > pageWidth / 2 ? 'auto' : '0',
+                              right: primaryRect.left > pageWidth / 2 ? '0' : 'auto',
+                              top: '28px',
+                            }
+                      }
+                    >
+                      <NoteCard
+                        item={ann}
+                        isAnnotation={true}
+                        anchorWarning={verification.warning}
+                        onEdit={() => {
+                          setActiveItemId(null);
+                          onEditAnnotation(ann);
+                        }}
+                        onDelete={() => {
+                          setActiveItemId(null);
+                          onDeleteAnnotation(ann.id);
+                        }}
+                        onClose={() => setActiveItemId(null)}
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             )}

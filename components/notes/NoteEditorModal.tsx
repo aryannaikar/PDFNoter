@@ -91,13 +91,13 @@ export function NoteEditorModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
       <div
-        className="w-full max-w-lg bg-white rounded-xl shadow-2xl border border-neutral-200 overflow-hidden flex flex-col"
+        className="w-full max-w-lg bg-white rounded-xl shadow-2xl border border-neutral-200 overflow-hidden flex flex-col max-h-[92vh] overflow-y-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="note-modal-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100 bg-neutral-50/70">
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-neutral-100 bg-neutral-50/70">
           <div>
             <h2 id="note-modal-title" className="text-base font-semibold text-neutral-800">
               {initialData?.content ? 'Edit Note' : (isAnnotation ? 'Add Text Note' : 'Add Page Note')}

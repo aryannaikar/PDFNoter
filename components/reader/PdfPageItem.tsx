@@ -238,12 +238,12 @@ export function PdfPageItem({
         width: `${dimensions.width}px`,
         height: `${dimensions.height}px`,
       }}
-      className="relative mx-auto my-6 bg-white shadow-xl rounded-md transition-shadow select-text"
+      className="relative mx-auto my-2 sm:my-6 bg-white shadow-md sm:shadow-xl rounded-sm sm:rounded-md transition-shadow select-text"
     >
       {isVisible ? (
         <>
           {/* Canvas Layer */}
-          <canvas ref={canvasRef} className="block rounded-md" />
+          <canvas ref={canvasRef} className="block rounded-sm sm:rounded-md" />
 
           {/* PDF.js Text Selection Layer */}
           <div

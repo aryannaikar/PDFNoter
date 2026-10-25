@@ -87,7 +87,7 @@ export function SearchBar({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute top-14 right-4 z-40 w-96 max-w-[90vw] bg-white rounded-xl shadow-2xl border border-neutral-200/90 p-3 animate-in fade-in slide-in-from-top-2 duration-150">
+    <div className="absolute top-14 left-2 right-2 sm:left-auto sm:right-4 z-40 sm:w-96 bg-white rounded-xl shadow-2xl border border-neutral-200/90 p-3 animate-in fade-in slide-in-from-top-2 duration-150">
       <form onSubmit={handleSearch} className="flex items-center gap-2">
         <div className="relative flex-1">
           <input
