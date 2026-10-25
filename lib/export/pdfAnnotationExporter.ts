@@ -10,6 +10,28 @@ export interface StandardPdfExportOptions {
   documentTitle?: string;
 }
 
+async function embedDataUrlImage(pdfDoc: PDFDocument, dataUrl: string) {
+  try {
+    const isPng = dataUrl.startsWith('data:image/png');
+    const isJpg = dataUrl.startsWith('data:image/jpeg') || dataUrl.startsWith('data:image/jpg');
+    if (!isPng && !isJpg) return null;
+    const base64Data = dataUrl.split(',')[1];
+    if (!base64Data) return null;
+    const binary = atob(base64Data);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    if (isPng) {
+      return await pdfDoc.embedPng(bytes);
+    } else {
+      return await pdfDoc.embedJpg(bytes);
+    }
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Embeds annotations and optionally appends study notes pages to a PDF,
  * producing a standard PDF that can be opened in any PDF viewer.
@@ -234,15 +256,28 @@ export async function exportAnnotatedStandardPdf(
         }
 
         if (note.imageUrl) {
-          checkPageBreak(14);
-          currentPage.drawText(`[Picture / Diagram attached in app]`, {
-            x: margin + 14,
-            y,
-            size: 8,
-            font: fontOblique,
-            color: rgb(0.1, 0.6, 0.4),
-          });
-          y -= 12;
+          const img = await embedDataUrlImage(pdfDoc, note.imageUrl);
+          if (img) {
+            const dims = img.scaleToFit(220, 140);
+            checkPageBreak(dims.height + 14);
+            currentPage.drawImage(img, {
+              x: margin + 14,
+              y: y - dims.height,
+              width: dims.width,
+              height: dims.height,
+            });
+            y -= (dims.height + 10);
+          } else {
+            checkPageBreak(14);
+            currentPage.drawText(`[Picture attached: ${note.imageUrl.slice(0, 60)}]`, {
+              x: margin + 14,
+              y,
+              size: 8,
+              font: fontOblique,
+              color: rgb(0.1, 0.6, 0.4),
+            });
+            y -= 12;
+          }
         }
 
         y -= 8; // Spacing between notes
@@ -300,6 +335,31 @@ export async function exportAnnotatedStandardPdf(
             color: rgb(0.3, 0.4, 0.8),
           });
           y -= 12;
+        }
+
+        if (ann.imageUrl) {
+          const img = await embedDataUrlImage(pdfDoc, ann.imageUrl);
+          if (img) {
+            const dims = img.scaleToFit(220, 140);
+            checkPageBreak(dims.height + 14);
+            currentPage.drawImage(img, {
+              x: margin + 14,
+              y: y - dims.height,
+              width: dims.width,
+              height: dims.height,
+            });
+            y -= (dims.height + 10);
+          } else {
+            checkPageBreak(14);
+            currentPage.drawText(`[Picture attached: ${ann.imageUrl.slice(0, 60)}]`, {
+              x: margin + 14,
+              y,
+              size: 8,
+              font: fontOblique,
+              color: rgb(0.1, 0.6, 0.4),
+            });
+            y -= 12;
+          }
         }
 
         y -= 8;
