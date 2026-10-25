@@ -14,12 +14,14 @@ import {
   AlertCircle,
   FileUp,
   FolderOpen,
+  Package,
 } from 'lucide-react';
 import { storageService } from '@/services/storage/dexieStorageService';
 import { computePdfFingerprint } from '@/lib/pdf/fingerprint';
 import { requestPersistentStorage } from '@/lib/db/database';
 import type { DocumentRecord } from '@/types';
 import { BackupModal } from './BackupModal';
+import { ExportShareModal } from '@/components/export/ExportShareModal';
 
 interface LibraryViewProps {
   onOpenDocument: (file: File, docRecord: DocumentRecord) => void;
@@ -33,6 +35,7 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isBackupOpen, setIsBackupOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [targetReopenDoc, setTargetReopenDoc] = useState<DocumentRecord | null>(null);
   const [isStoragePersisted, setIsStoragePersisted] = useState<boolean | null>(null);
 
@@ -78,10 +81,15 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
     }
   };
 
-  // Process a selected PDF file
+  // Process a selected PDF or .pdfnoter file
   const processSelectedFile = async (file: File, expectedDoc?: DocumentRecord) => {
+    if (file.name.toLowerCase().endsWith('.pdfnoter') || file.name.toLowerCase().endsWith('.zip')) {
+      setIsImportModalOpen(true);
+      return;
+    }
+
     if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
-      setErrorMessage('Please select a valid PDF file.');
+      setErrorMessage('Please select a valid PDF file or a .pdfnoter study package.');
       return;
     }
 
@@ -171,7 +179,7 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
       <input
         ref={fileInputRef}
         type="file"
-        accept="application/pdf,.pdf"
+        accept="application/pdf,.pdf,.pdfnoter,.zip"
         onChange={handleFileInputChange}
         className="hidden"
       />
@@ -197,6 +205,16 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsImportModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-700 bg-white hover:bg-neutral-100 border border-neutral-200 rounded-lg shadow-2xs transition"
+              title="Import a shared PDFNoter study package (.pdfnoter)"
+            >
+              <Package className="w-3.5 h-3.5 text-indigo-600" />
+              <span className="hidden sm:inline">Import Study File</span>
+              <span className="sm:hidden">Import</span>
+            </button>
+
             <button
               onClick={() => setIsBackupOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-700 bg-white hover:bg-neutral-100 border border-neutral-200 rounded-lg shadow-2xs transition"
@@ -385,6 +403,17 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
         isOpen={isBackupOpen}
         onClose={() => setIsBackupOpen(false)}
         onDataRestored={loadDocuments}
+      />
+
+      {/* Import Study File Modal */}
+      <ExportShareModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        defaultTab="import"
+        onImportSuccess={(file, docRecord) => {
+          loadDocuments();
+          onOpenDocument(file, docRecord);
+        }}
       />
     </div>
   );

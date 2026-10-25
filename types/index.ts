@@ -48,6 +48,7 @@ export interface AnnotationRecord {
   noteTitle?: string;
   noteContent: string;
   sourceUrl?: string;
+  color?: string;
   createdAt: number;
   updatedAt: number;
 }

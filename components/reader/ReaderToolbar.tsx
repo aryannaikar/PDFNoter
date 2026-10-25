@@ -12,6 +12,7 @@ import {
   Bookmark,
   FileText,
   Plus,
+  Share2,
 } from 'lucide-react';
 
 interface ReaderToolbarProps {
@@ -33,6 +34,7 @@ interface ReaderToolbarProps {
   onOpenBookmarks: () => void;
   onOpenNotes: () => void;
   onAddPageNote: () => void;
+  onOpenExportShare: () => void;
 }
 
 export function ReaderToolbar({
@@ -54,6 +56,7 @@ export function ReaderToolbar({
   onOpenBookmarks,
   onOpenNotes,
   onAddPageNote,
+  onOpenExportShare,
 }: ReaderToolbarProps) {
   const [pageInput, setPageInput] = useState(String(currentPage));
 
@@ -208,6 +211,16 @@ export function ReaderToolbar({
                 title="Notes on this page"
               />
             )}
+          </button>
+
+          {/* Export & Share */}
+          <button
+            onClick={onOpenExportShare}
+            className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition"
+            title="Export & Share"
+            aria-label="Export & Share"
+          >
+            <Share2 className="w-4 h-4" />
           </button>
 
           {/* Primary Action: Add Page Note */}

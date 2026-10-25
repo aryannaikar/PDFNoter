@@ -15,6 +15,7 @@ import { SearchBar } from './SearchBar';
 import { BookmarksDrawer } from './BookmarksDrawer';
 import { NotesDrawer } from './NotesDrawer';
 import { NoteEditorModal, NoteEditorData } from '@/components/notes/NoteEditorModal';
+import { ExportShareModal } from '@/components/export/ExportShareModal';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 interface PdfReaderViewProps {
@@ -46,6 +47,7 @@ export function PdfReaderView({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
+  const [isExportShareOpen, setIsExportShareOpen] = useState(false);
 
   // Editor modal state
   const [editorState, setEditorState] = useState<{
@@ -499,6 +501,7 @@ export function PdfReaderView({
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenBookmarks={() => setIsBookmarksOpen(true)}
         onOpenNotes={() => setIsNotesOpen(true)}
+        onOpenExportShare={() => setIsExportShareOpen(true)}
         onAddPageNote={handleAddPageNote}
       />
 
@@ -589,6 +592,33 @@ export function PdfReaderView({
         initialData={editorState.initialData}
         onSave={handleSaveEditor}
         onCancel={() => setEditorState((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* Export & Share Modal */}
+      <ExportShareModal
+        isOpen={isExportShareOpen}
+        onClose={() => setIsExportShareOpen(false)}
+        pdfFile={file}
+        documentRecord={documentRecord}
+        notes={notes}
+        annotations={annotations}
+        bookmarks={bookmarks}
+        onImportSuccess={async (importedFile, importedDoc) => {
+          if (importedDoc.id === documentRecord.id) {
+            // Reload notes, annotations, bookmarks
+            const [loadedNotes, loadedAnn, loadedBm] = await Promise.all([
+              storageService.getNotesForDocument(documentRecord.id),
+              storageService.getAnnotationsForDocument(documentRecord.id),
+              storageService.getBookmarksForDocument(documentRecord.id),
+            ]);
+            setNotes(loadedNotes);
+            setAnnotations(loadedAnn);
+            setBookmarks(loadedBm);
+          } else {
+            // Imported a new document or copy; return to library
+            onBackToLibrary();
+          }
+        }}
       />
     </div>
   );
