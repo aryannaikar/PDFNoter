@@ -5,13 +5,69 @@
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+  --sticky-bg: #ffffff;
+  --sticky-header: #f8fafc;
+  --sticky-text: #000000;
+  --sticky-text-muted: #374151;
+  --sticky-border: #d1d5db;
+  --sticky-code-bg: #f3f4f6;
+  --sticky-code-text: #000000;
+  --sticky-code-border: #e5e7eb;
   color-scheme: light;
 }
 
 .dark, [data-theme="dark"] {
   --background: #090d16;
   --foreground: #f8fafc;
+  --sticky-bg: #121212;
+  --sticky-header: #1c1c1c;
+  --sticky-text: #ffffff;
+  --sticky-text-muted: #d1d5db;
+  --sticky-border: #374151;
+  --sticky-code-bg: #1c1c1c;
+  --sticky-code-text: #ffffff;
+  --sticky-code-border: #374151;
   color-scheme: dark;
+}
+
+/* Explicit solid opaque styling for sticky notes and popovers */
+.sticky-note-card {
+  background-color: var(--sticky-bg) !important;
+  color: var(--sticky-text) !important;
+  border-color: var(--sticky-border) !important;
+  opacity: 1 !important;
+  isolation: isolate;
+}
+
+.sticky-note-header {
+  background-color: var(--sticky-header) !important;
+  color: var(--sticky-text) !important;
+  border-color: var(--sticky-border) !important;
+  opacity: 1 !important;
+}
+
+.sticky-note-body {
+  background-color: var(--sticky-bg) !important;
+  color: var(--sticky-text) !important;
+  opacity: 1 !important;
+}
+
+.sticky-note-text {
+  color: var(--sticky-text) !important;
+}
+
+.sticky-note-code {
+  background-color: var(--sticky-code-bg) !important;
+  color: var(--sticky-code-text) !important;
+  border-color: var(--sticky-code-border) !important;
+  opacity: 1 !important;
+}
+
+.sticky-note-footer {
+  background-color: var(--sticky-header) !important;
+  color: var(--sticky-text) !important;
+  border-color: var(--sticky-border) !important;
+  opacity: 1 !important;
 }
 
 body {
