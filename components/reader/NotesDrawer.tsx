@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, FileText, Highlighter, Search, ArrowRight, ExternalLink } from 'lucide-react';
+import { X, FileText, Highlighter, Search, ArrowRight, ExternalLink, Image as ImageIcon } from 'lucide-react';
 import type { NoteRecord, AnnotationRecord } from '@/types';
 import { sanitizeUrl } from '@/lib/utils/url';
+import { sanitizeImageUrl } from '@/lib/utils/image';
 
 interface NotesDrawerProps {
   isOpen: boolean;
@@ -143,6 +144,7 @@ export function NotesDrawer({
             const content = isNote ? (item as NoteRecord).content : (item as AnnotationRecord).noteContent;
             const selectedText = !isNote ? (item as AnnotationRecord).selectedText : null;
             const sourceUrl = item.sourceUrl ? sanitizeUrl(item.sourceUrl) : null;
+            const imageUrl = item.imageUrl ? sanitizeImageUrl(item.imageUrl) : null;
 
             return (
               <div
@@ -164,6 +166,12 @@ export function NotesDrawer({
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300">
                         <Highlighter className="w-2.5 h-2.5" />
                         Text Highlight
+                      </span>
+                    )}
+                    {imageUrl && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300">
+                        <ImageIcon className="w-2.5 h-2.5" />
+                        Picture
                       </span>
                     )}
                     <span className="text-[11px] font-semibold text-neutral-700 dark:text-neutral-300">
@@ -192,6 +200,17 @@ export function NotesDrawer({
                 >
                   {content}
                 </div>
+
+                {imageUrl && (
+                  <div className="mt-2 rounded-md overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 max-h-32 flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imageUrl}
+                      alt={title || 'Attached picture'}
+                      className="max-h-28 w-auto object-contain rounded"
+                    />
+                  </div>
+                )}
 
                 {sourceUrl && (
                   <div className="mt-2 pt-1 border-t border-neutral-100 dark:border-neutral-800 flex items-center gap-1 text-[11px] text-indigo-600 dark:text-indigo-400 truncate">

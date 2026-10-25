@@ -16,6 +16,7 @@ export interface NoteRecord {
   title?: string;
   content: string;
   sourceUrl?: string;
+  imageUrl?: string;
   createdAt: number;
   updatedAt: number;
 }
@@ -48,6 +49,7 @@ export interface AnnotationRecord {
   noteTitle?: string;
   noteContent: string;
   sourceUrl?: string;
+  imageUrl?: string;
   color?: string;
   createdAt: number;
   updatedAt: number;

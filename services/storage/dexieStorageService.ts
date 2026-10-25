@@ -9,6 +9,7 @@ import type {
   BackupData,
 } from '@/types';
 import { sanitizeUrl } from '@/lib/utils/url';
+import { sanitizeImageUrl } from '@/lib/utils/image';
 
 function generateId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -159,6 +160,7 @@ export class DexieStorageService implements IStorageService {
     if (!note.content || !note.content.trim()) throw new Error('Note content cannot be empty');
 
     const sanitizedUrl = note.sourceUrl ? sanitizeUrl(note.sourceUrl) : undefined;
+    const sanitizedImg = note.imageUrl ? sanitizeImageUrl(note.imageUrl) : undefined;
     const now = Date.now();
     const newNote: NoteRecord = {
       id: generateId(),
@@ -167,6 +169,7 @@ export class DexieStorageService implements IStorageService {
       title: note.title?.trim() || undefined,
       content: note.content.trim(),
       sourceUrl: sanitizedUrl,
+      imageUrl: sanitizedImg,
       createdAt: now,
       updatedAt: now,
     };
@@ -182,7 +185,7 @@ export class DexieStorageService implements IStorageService {
 
   async updateNote(
     id: string,
-    updates: Partial<Pick<NoteRecord, 'title' | 'content' | 'sourceUrl'>>
+    updates: Partial<Pick<NoteRecord, 'title' | 'content' | 'sourceUrl' | 'imageUrl'>>
   ): Promise<NoteRecord> {
     const existing = await this.database.notes.get(id);
     if (!existing) throw new Error(`Note ${id} not found`);
@@ -195,11 +198,16 @@ export class DexieStorageService implements IStorageService {
       ? (updates.sourceUrl ? sanitizeUrl(updates.sourceUrl) : undefined)
       : existing.sourceUrl;
 
+    const sanitizedImg = updates.imageUrl !== undefined
+      ? (updates.imageUrl ? sanitizeImageUrl(updates.imageUrl) : undefined)
+      : existing.imageUrl;
+
     const updated: NoteRecord = {
       ...existing,
       title: updates.title !== undefined ? (updates.title?.trim() || undefined) : existing.title,
       content: updates.content !== undefined ? updates.content.trim() : existing.content,
       sourceUrl: sanitizedUrl,
+      imageUrl: sanitizedImg,
       updatedAt: Date.now(),
     };
 
@@ -253,6 +261,7 @@ export class DexieStorageService implements IStorageService {
     if (!ann.noteContent || !ann.noteContent.trim()) throw new Error('Annotation note content cannot be empty');
 
     const sanitizedUrl = ann.sourceUrl ? sanitizeUrl(ann.sourceUrl) : undefined;
+    const sanitizedImg = ann.imageUrl ? sanitizeImageUrl(ann.imageUrl) : undefined;
     const now = Date.now();
     const newAnn: AnnotationRecord = {
       id: generateId(),
@@ -266,6 +275,7 @@ export class DexieStorageService implements IStorageService {
       noteTitle: ann.noteTitle?.trim() || undefined,
       noteContent: ann.noteContent.trim(),
       sourceUrl: sanitizedUrl,
+      imageUrl: sanitizedImg,
       createdAt: now,
       updatedAt: now,
     };
@@ -281,7 +291,7 @@ export class DexieStorageService implements IStorageService {
 
   async updateAnnotation(
     id: string,
-    updates: Partial<Pick<AnnotationRecord, 'noteTitle' | 'noteContent' | 'sourceUrl'>>
+    updates: Partial<Pick<AnnotationRecord, 'noteTitle' | 'noteContent' | 'sourceUrl' | 'imageUrl'>>
   ): Promise<AnnotationRecord> {
     const existing = await this.database.annotations.get(id);
     if (!existing) throw new Error(`Annotation ${id} not found`);
@@ -294,11 +304,16 @@ export class DexieStorageService implements IStorageService {
       ? (updates.sourceUrl ? sanitizeUrl(updates.sourceUrl) : undefined)
       : existing.sourceUrl;
 
+    const sanitizedImg = updates.imageUrl !== undefined
+      ? (updates.imageUrl ? sanitizeImageUrl(updates.imageUrl) : undefined)
+      : existing.imageUrl;
+
     const updated: AnnotationRecord = {
       ...existing,
       noteTitle: updates.noteTitle !== undefined ? (updates.noteTitle?.trim() || undefined) : existing.noteTitle,
       noteContent: updates.noteContent !== undefined ? updates.noteContent.trim() : existing.noteContent,
       sourceUrl: sanitizedUrl,
+      imageUrl: sanitizedImg,
       updatedAt: Date.now(),
     };
 
@@ -456,6 +471,7 @@ export class DexieStorageService implements IStorageService {
         title: n.title ? String(n.title).slice(0, 300) : undefined,
         content: String(n.content).slice(0, 50000),
         sourceUrl: n.sourceUrl ? sanitizeUrl(String(n.sourceUrl)) : undefined,
+        imageUrl: n.imageUrl ? sanitizeImageUrl(String(n.imageUrl)) : undefined,
         createdAt: Number(n.createdAt) || Date.now(),
         updatedAt: Number(n.updatedAt) || Date.now(),
       }));
@@ -479,6 +495,7 @@ export class DexieStorageService implements IStorageService {
         noteTitle: a.noteTitle ? String(a.noteTitle).slice(0, 300) : undefined,
         noteContent: String(a.noteContent).slice(0, 50000),
         sourceUrl: a.sourceUrl ? sanitizeUrl(String(a.sourceUrl)) : undefined,
+        imageUrl: a.imageUrl ? sanitizeImageUrl(String(a.imageUrl)) : undefined,
         createdAt: Number(a.createdAt) || Date.now(),
         updatedAt: Number(a.updatedAt) || Date.now(),
       }));

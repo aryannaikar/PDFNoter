@@ -20,14 +20,14 @@ export interface IStorageService {
   getNotesForPage(documentId: string, pageNumber: number): Promise<NoteRecord[]>;
   getNotesForDocument(documentId: string): Promise<NoteRecord[]>;
   createNote(note: Omit<NoteRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<NoteRecord>;
-  updateNote(id: string, updates: Partial<Pick<NoteRecord, 'title' | 'content' | 'sourceUrl'>>): Promise<NoteRecord>;
+  updateNote(id: string, updates: Partial<Pick<NoteRecord, 'title' | 'content' | 'sourceUrl' | 'imageUrl'>>): Promise<NoteRecord>;
   deleteNote(id: string): Promise<void>;
 
   // Annotations
   getAnnotationsForPage(documentId: string, pageNumber: number): Promise<AnnotationRecord[]>;
   getAnnotationsForDocument(documentId: string): Promise<AnnotationRecord[]>;
   createAnnotation(ann: Omit<AnnotationRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<AnnotationRecord>;
-  updateAnnotation(id: string, updates: Partial<Pick<AnnotationRecord, 'noteTitle' | 'noteContent' | 'sourceUrl'>>): Promise<AnnotationRecord>;
+  updateAnnotation(id: string, updates: Partial<Pick<AnnotationRecord, 'noteTitle' | 'noteContent' | 'sourceUrl' | 'imageUrl'>>): Promise<AnnotationRecord>;
   deleteAnnotation(id: string): Promise<void>;
 
   // Bookmarks

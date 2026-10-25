@@ -370,6 +370,7 @@ export function PdfReaderView({
         title: note.title,
         content: note.content,
         sourceUrl: note.sourceUrl,
+        imageUrl: note.imageUrl,
       },
       editTargetId: note.id,
     });
@@ -393,6 +394,7 @@ export function PdfReaderView({
         title: ann.noteTitle,
         content: ann.noteContent,
         sourceUrl: ann.sourceUrl,
+        imageUrl: ann.imageUrl,
         selectedText: ann.selectedText,
       },
       editTargetId: ann.id,
@@ -416,6 +418,7 @@ export function PdfReaderView({
           noteTitle: data.title,
           noteContent: data.content,
           sourceUrl: data.sourceUrl,
+          imageUrl: data.imageUrl,
         });
         setAnnotations((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
       } else {
@@ -431,6 +434,7 @@ export function PdfReaderView({
           noteTitle: data.title,
           noteContent: data.content,
           sourceUrl: data.sourceUrl,
+          imageUrl: data.imageUrl,
         });
         setAnnotations((prev) => [...prev, created]);
       }
@@ -441,6 +445,7 @@ export function PdfReaderView({
           title: data.title,
           content: data.content,
           sourceUrl: data.sourceUrl,
+          imageUrl: data.imageUrl,
         });
         setNotes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
       } else {
@@ -451,6 +456,7 @@ export function PdfReaderView({
           title: data.title,
           content: data.content,
           sourceUrl: data.sourceUrl,
+          imageUrl: data.imageUrl,
         });
         setNotes((prev) => [...prev, created]);
       }

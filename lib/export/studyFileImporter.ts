@@ -13,6 +13,7 @@ import type {
 } from '@/types/studyFile';
 import { computePdfFingerprint } from '@/lib/pdf/fingerprint';
 import { sanitizeUrl } from '@/lib/utils/url';
+import { sanitizeImageUrl } from '@/lib/utils/image';
 import { storageService } from '@/services/storage/dexieStorageService';
 
 const MAX_ZIP_SIZE = 150 * 1024 * 1024; // 150MB limit
@@ -137,6 +138,7 @@ export async function validateStudyFile(
                 title: n.title ? String(n.title).slice(0, 300) : undefined,
                 content: String(n.content ?? n.noteContent ?? '').slice(0, 50000),
                 sourceUrl: n.sourceUrl ? sanitizeUrl(String(n.sourceUrl)) : undefined,
+                imageUrl: n.imageUrl ? sanitizeImageUrl(String(n.imageUrl)) : undefined,
                 createdAt: Number(n.createdAt) || Date.now(),
                 updatedAt: Number(n.updatedAt) || Date.now(),
               };
@@ -173,6 +175,7 @@ export async function validateStudyFile(
               noteTitle: a.noteTitle ? String(a.noteTitle).slice(0, 300) : undefined,
               noteContent: String(a.noteContent ?? a.content ?? '').slice(0, 50000),
               sourceUrl: a.sourceUrl ? sanitizeUrl(String(a.sourceUrl)) : undefined,
+              imageUrl: a.imageUrl ? sanitizeImageUrl(String(a.imageUrl)) : undefined,
               color: a.color ? String(a.color) : undefined,
               createdAt: Number(a.createdAt) || Date.now(),
               updatedAt: Number(a.updatedAt) || Date.now(),
@@ -325,6 +328,7 @@ export async function commitStudyFileImport(
         title: note.title,
         content: note.content,
         sourceUrl: note.sourceUrl,
+        imageUrl: note.imageUrl,
       });
     }
   }
@@ -337,6 +341,7 @@ export async function commitStudyFileImport(
         noteTitle: ann.noteTitle,
         noteContent: ann.noteContent,
         sourceUrl: ann.sourceUrl,
+        imageUrl: ann.imageUrl,
       });
     }
   }

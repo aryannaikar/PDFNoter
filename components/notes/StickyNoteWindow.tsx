@@ -13,9 +13,11 @@ import {
   Minimize2,
   Maximize2,
   List,
+  ZoomIn,
 } from 'lucide-react';
 import type { NoteRecord, AnnotationRecord } from '@/types';
 import { sanitizeUrl } from '@/lib/utils/url';
+import { sanitizeImageUrl } from '@/lib/utils/image';
 
 export interface StickyNoteWindowProps {
   isOpen: boolean;
@@ -52,6 +54,7 @@ export function StickyNoteWindow({
 }: StickyNoteWindowProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   // Position state (draggable)
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
@@ -166,6 +169,7 @@ export function StickyNoteWindow({
     ? (currentItem.item as AnnotationRecord).selectedText
     : undefined;
   const sourceUrl = currentItem?.item.sourceUrl ? sanitizeUrl(currentItem.item.sourceUrl) : '';
+  const imageUrl = currentItem?.item.imageUrl ? sanitizeImageUrl(currentItem.item.imageUrl) : undefined;
 
   // Minimized state: crisp tab sticking on the right edge of PDF
   if (isMinimized) {
@@ -194,7 +198,8 @@ export function StickyNoteWindow({
   }
 
   return (
-    <div
+    <>
+      <div
       style={{
         position: 'fixed',
         left: position ? `${position.x}px` : undefined,
@@ -368,6 +373,28 @@ export function StickyNoteWindow({
               {content || <span className="opacity-50 italic">Empty note</span>}
             </div>
 
+            {/* Attached Picture / Diagram if present */}
+            {imageUrl && (
+              <div className="pt-2 border-t border-neutral-200/80 dark:border-neutral-800">
+                <div
+                  onClick={() => setLightboxOpen(true)}
+                  className="relative group rounded-lg overflow-hidden border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 cursor-pointer max-h-48 flex items-center justify-center transition hover:opacity-95"
+                  title="Click to enlarge picture"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imageUrl}
+                    alt={title || 'Attached picture'}
+                    className="w-full object-contain max-h-44 rounded-md"
+                  />
+                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium gap-1">
+                    <ZoomIn className="w-4 h-4" />
+                    <span>Click to enlarge</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Source URL if present */}
             {sourceUrl && (
               <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800">
@@ -480,5 +507,31 @@ export function StickyNoteWindow({
         </div>
       </div>
     </div>
+
+      {/* Lightbox Modal for enlarged view */}
+      {lightboxOpen && imageUrl && (
+        <div
+          className="fixed inset-0 z-60 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] overflow-hidden flex flex-col items-center">
+            <button
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-2 right-2 p-2 bg-black/60 hover:bg-black/90 text-white rounded-full transition cursor-pointer"
+              aria-label="Close enlarged picture"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imageUrl}
+              alt="Enlarged note diagram"
+              className="max-h-[85vh] max-w-full rounded-lg object-contain shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

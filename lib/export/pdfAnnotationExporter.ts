@@ -233,6 +233,18 @@ export async function exportAnnotatedStandardPdf(
           y -= 12;
         }
 
+        if (note.imageUrl) {
+          checkPageBreak(14);
+          currentPage.drawText(`[Picture / Diagram attached in app]`, {
+            x: margin + 14,
+            y,
+            size: 8,
+            font: fontOblique,
+            color: rgb(0.1, 0.6, 0.4),
+          });
+          y -= 12;
+        }
+
         y -= 8; // Spacing between notes
       }
 

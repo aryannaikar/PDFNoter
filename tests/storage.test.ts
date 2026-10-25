@@ -77,8 +77,14 @@ describe('Storage Service & IndexedDB Unit Tests', () => {
     const updated = await service.updateNote(note.id, {
       title: 'Avogadro Constant (Updated)',
       content: 'Revised definition with exact SI value',
+      imageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
     });
     expect(updated.title).toBe('Avogadro Constant (Updated)');
+    expect(updated.imageUrl).toBeDefined();
+
+    // Verify fetched note has imageUrl
+    const fetchedNotes = await service.getNotesForPage(doc.id, 3);
+    expect(fetchedNotes[0].imageUrl).toContain('data:image/png;base64');
 
     // Delete
     await service.deleteNote(note.id);
