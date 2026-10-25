@@ -167,7 +167,7 @@ export function StickyNoteWindow({
     : undefined;
   const sourceUrl = currentItem?.item.sourceUrl ? sanitizeUrl(currentItem.item.sourceUrl) : '';
 
-  // Minimized state: cute Post-It tab sticking on the right edge of PDF
+  // Minimized state: crisp tab sticking on the right edge of PDF
   if (isMinimized) {
     return (
       <div
@@ -182,12 +182,12 @@ export function StickyNoteWindow({
         <button
           type="button"
           onClick={() => setIsMinimized(false)}
-          className="flex items-center gap-1.5 px-3 py-2 bg-[#fef9c3] hover:bg-[#fef08a] text-amber-950 font-semibold text-xs rounded-l-xl shadow-xl border-y border-l border-amber-300 transition-all hover:translate-x-[-4px]"
+          className="flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-100 font-semibold text-xs rounded-l-xl shadow-xl border-y border-l border-neutral-250 dark:border-neutral-700 transition-all hover:translate-x-[-4px]"
           title="Expand Sticky Note"
         >
-          <StickyNote className="w-4 h-4 text-amber-600 fill-amber-300" />
+          <StickyNote className="w-4 h-4 text-amber-500 fill-amber-200" />
           <span>Sticky Note ({totalNotes})</span>
-          <Maximize2 className="w-3 h-3 text-amber-700 ml-0.5" />
+          <Maximize2 className="w-3 h-3 text-neutral-500 ml-0.5" />
         </button>
       </div>
     );
@@ -206,20 +206,22 @@ export function StickyNoteWindow({
       role="dialog"
       aria-labelledby="sticky-note-title"
     >
-      {/* Sticky Note Body (Authentic Post-It Paper Aesthetic) */}
-      <div className="relative bg-[#fef9c3] rounded-sm sm:rounded-md shadow-2xl shadow-amber-950/25 border border-amber-300/80 overflow-hidden flex flex-col text-neutral-800 transition-all">
-        {/* Top Washi Tape / Tape Strip Effect */}
+      {/* 100% Solid Opaque White Card Container with Crisp Elevation */}
+      <div className="relative bg-white dark:bg-neutral-900 rounded-xl shadow-2xl shadow-black/25 border border-neutral-300 dark:border-neutral-750 overflow-hidden flex flex-col text-neutral-900 dark:text-neutral-100 transition-all">
+        {/* Top Header Bar / Draggable handle */}
         <div
           onMouseDown={handleMouseDown}
-          className="w-full bg-[#fef08a]/90 border-b border-amber-300/60 pt-2 pb-1.5 px-3 cursor-grab active:cursor-grabbing flex flex-col items-center select-none"
+          className="w-full bg-neutral-50 dark:bg-neutral-850 border-b border-neutral-200 dark:border-neutral-800 pt-2 pb-2 px-3.5 cursor-grab active:cursor-grabbing flex flex-col items-center select-none"
         >
-          {/* Simulated semi-transparent adhesive tape */}
-          <div className="h-2.5 w-24 bg-white/50 backdrop-blur-xs rounded-xs border border-white/60 shadow-2xs mb-1" />
+          {/* Subtle drag handle pill */}
+          <div className="h-1 w-12 bg-neutral-300 dark:bg-neutral-600 rounded-full mb-1.5" />
 
           {/* Sticky Note Top Bar Header */}
-          <div className="w-full flex items-center justify-between text-xs font-semibold text-amber-950">
+          <div className="w-full flex items-center justify-between text-xs font-semibold text-neutral-800 dark:text-neutral-100">
             <div className="flex items-center gap-1.5">
-              <StickyNote className="w-4 h-4 text-amber-700 fill-amber-400 shrink-0" />
+              <div className="w-5 h-5 rounded-md bg-amber-100 dark:bg-amber-950/60 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                <StickyNote className="w-3.5 h-3.5 fill-amber-300 dark:fill-amber-400/40" />
+              </div>
               <span id="sticky-note-title" className="text-xs font-bold tracking-tight">
                 {totalNotes === 0
                   ? `Sticky Note • Page ${currentPage}`
@@ -232,7 +234,7 @@ export function StickyNoteWindow({
               <button
                 type="button"
                 onClick={onAddNote}
-                className="p-1 text-amber-800 hover:text-amber-950 hover:bg-amber-200/60 rounded transition"
+                className="p-1 text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200/70 dark:hover:bg-neutral-700 rounded-md transition"
                 title="Stick a new note on this page"
                 aria-label="Add new sticky note"
               >
@@ -242,7 +244,7 @@ export function StickyNoteWindow({
               <button
                 type="button"
                 onClick={() => setIsMinimized(true)}
-                className="p-1 text-amber-800 hover:text-amber-950 hover:bg-amber-200/60 rounded transition"
+                className="p-1 text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200/70 dark:hover:bg-neutral-700 rounded-md transition"
                 title="Minimize sticky note"
                 aria-label="Minimize sticky note"
               >
@@ -252,7 +254,7 @@ export function StickyNoteWindow({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1 text-amber-800 hover:text-rose-700 hover:bg-amber-200/60 rounded transition"
+                className="p-1 text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-md transition"
                 title="Close sticky note"
                 aria-label="Close sticky note"
               >
@@ -262,17 +264,17 @@ export function StickyNoteWindow({
           </div>
         </div>
 
-        {/* Note Content Area */}
+        {/* Note Content Area (Solid white, opaque background covering PDF) */}
         {totalNotes > 0 && currentItem ? (
-          <div className="p-3.5 flex flex-col space-y-2.5 max-h-[60vh] overflow-y-auto">
+          <div className="p-4 flex flex-col space-y-3 max-h-[60vh] overflow-y-auto bg-white dark:bg-neutral-900">
             {/* Page Pin & Navigation Bar */}
-            <div className="flex items-center justify-between text-[11px] pb-1.5 border-b border-amber-200/70">
+            <div className="flex items-center justify-between text-[11px] pb-2 border-b border-neutral-100 dark:border-neutral-800">
               <div className="flex items-center gap-1.5">
                 <span
                   className={`px-2 py-0.5 rounded-full font-bold uppercase tracking-wider text-[10px] ${
                     isCurrentPage
                       ? 'bg-amber-500 text-white'
-                      : 'bg-amber-200 text-amber-900 cursor-pointer hover:bg-amber-300'
+                      : 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 cursor-pointer hover:bg-amber-200 dark:hover:bg-amber-900'
                   }`}
                   onClick={() => {
                     if (!isCurrentPage) onNavigateToPage(currentItem.pageNumber);
@@ -283,14 +285,14 @@ export function StickyNoteWindow({
                   {!isCurrentPage && ' ↗'}
                 </span>
 
-                <span className="text-amber-800/80 font-medium text-[11px] truncate max-w-[140px]">
+                <span className="text-neutral-600 dark:text-neutral-300 font-medium text-[11px] truncate max-w-[140px]">
                   {title || (isAnnotation ? 'Text Highlight Note' : 'Page Note')}
                 </span>
               </div>
 
-              {/* Note Pager Navigation (flip like physical sticky notes in a book) */}
+              {/* Note Pager Navigation */}
               {totalNotes > 1 && (
-                <div className="flex items-center gap-0.5 bg-amber-200/60 rounded-md p-0.5 text-amber-900">
+                <div className="flex items-center gap-0.5 bg-neutral-100 dark:bg-neutral-800 rounded-md p-0.5 text-neutral-700 dark:text-neutral-300">
                   <button
                     type="button"
                     onClick={() => {
@@ -298,13 +300,13 @@ export function StickyNoteWindow({
                       setSelectedIndex(next);
                       if (allItems[next]) onNavigateToPage(allItems[next].pageNumber);
                     }}
-                    className="p-0.5 hover:bg-amber-300/80 rounded transition"
+                    className="p-1 hover:bg-white dark:hover:bg-neutral-700 rounded transition"
                     title="Previous sticky note"
                     aria-label="Previous sticky note"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
                   </button>
-                  <span className="text-[10px] font-semibold px-1">
+                  <span className="text-[10px] font-semibold px-1.5">
                     {selectedIndex + 1}/{totalNotes}
                   </span>
                   <button
@@ -314,7 +316,7 @@ export function StickyNoteWindow({
                       setSelectedIndex(next);
                       if (allItems[next]) onNavigateToPage(allItems[next].pageNumber);
                     }}
-                    className="p-0.5 hover:bg-amber-300/80 rounded transition"
+                    className="p-1 hover:bg-white dark:hover:bg-neutral-700 rounded transition"
                     title="Next sticky note"
                     aria-label="Next sticky note"
                   >
@@ -326,30 +328,30 @@ export function StickyNoteWindow({
 
             {/* Quoted highlight text if annotation */}
             {selectedText && (
-              <div className="p-2 bg-amber-200/50 border-l-3 border-amber-500 rounded-r-xs text-xs text-amber-950 font-serif italic whitespace-pre-wrap break-words leading-relaxed">
+              <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40 border-l-3 border-amber-400 dark:border-amber-500 rounded-r-md text-xs text-amber-950 dark:text-amber-200 font-serif italic whitespace-pre-wrap break-words leading-relaxed">
                 "{selectedText}"
               </div>
             )}
 
             {/* Note text content */}
             <div
-              className={`text-xs text-amber-950 whitespace-pre-wrap break-words leading-relaxed min-h-[4rem] ${
+              className={`text-xs text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap break-words leading-relaxed min-h-[4rem] ${
                 title?.toLowerCase().includes('code') || /^(\s*#|\s*\/\/|\s*import |\s*def |\s*const |\s*let )/m.test(content)
-                  ? 'font-mono text-[11px] bg-amber-200/50 p-2.5 rounded border border-amber-300/70 my-1'
+                  ? 'font-mono text-[11px] bg-neutral-100 dark:bg-neutral-800 p-2.5 rounded-md border border-neutral-200 dark:border-neutral-700 my-1'
                   : 'font-sans my-1'
               }`}
             >
-              {content || <span className="text-amber-800/50 italic">Empty note</span>}
+              {content || <span className="text-neutral-400 italic">Empty note</span>}
             </div>
 
             {/* Source URL if present */}
             {sourceUrl && (
-              <div className="pt-1.5 border-t border-amber-200/50">
+              <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800">
                 <a
                   href={sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-900 hover:text-indigo-700 hover:underline truncate max-w-full"
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline truncate max-w-full"
                   title={sourceUrl}
                 >
                   <ExternalLink className="w-3 h-3 shrink-0" />
@@ -360,35 +362,35 @@ export function StickyNoteWindow({
           </div>
         ) : (
           /* Empty state for page with no notes */
-          <div className="p-6 text-center space-y-3">
-            <div className="w-10 h-10 mx-auto rounded-full bg-amber-200/70 text-amber-800 flex items-center justify-center">
+          <div className="p-6 text-center space-y-3 bg-white dark:bg-neutral-900">
+            <div className="w-10 h-10 mx-auto rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 flex items-center justify-center">
               <StickyNote className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-amber-950">No sticky notes on Page {currentPage}</p>
-              <p className="text-[11px] text-amber-800/80 mt-1">
-                Stick quick notes or formulas on this page just like in a physical textbook.
+              <p className="text-xs font-semibold text-neutral-900 dark:text-neutral-100">No sticky notes on Page {currentPage}</p>
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1">
+                Attach quick notes, code snippets, or formulas on this page.
               </p>
             </div>
             <button
               type="button"
               onClick={onAddNote}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-900 hover:bg-amber-950 text-white rounded-lg text-xs font-medium shadow-xs transition"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium shadow-xs transition"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Add Sticky Note to Page {currentPage}</span>
+              <span>Add Note to Page {currentPage}</span>
             </button>
           </div>
         )}
 
         {/* Footer Actions */}
-        <div className="px-3 py-2 bg-[#fef08a]/60 border-t border-amber-300/50 flex items-center justify-between text-xs text-amber-900">
+        <div className="px-3.5 py-2.5 bg-neutral-50 dark:bg-neutral-850 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-xs text-neutral-700 dark:text-neutral-300">
           <div className="flex items-center gap-1">
             {onOpenFullList && (
               <button
                 type="button"
                 onClick={onOpenFullList}
-                className="flex items-center gap-1 px-1.5 py-1 text-[11px] text-amber-900 hover:bg-amber-200/80 rounded transition"
+                className="flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-200/60 dark:hover:bg-neutral-700 rounded-md transition"
                 title="Search and list all notes"
               >
                 <List className="w-3 h-3" />
@@ -408,7 +410,7 @@ export function StickyNoteWindow({
                     onEditAnnotation(currentItem.item as AnnotationRecord);
                   }
                 }}
-                className="flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-amber-950 hover:bg-amber-200/80 rounded transition"
+                className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-200/60 dark:hover:bg-neutral-700 rounded-md transition"
                 title="Edit note text"
                 aria-label="Edit note"
               >
@@ -427,7 +429,7 @@ export function StickyNoteWindow({
                     }
                   }
                 }}
-                className="flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-rose-700 hover:bg-rose-100 rounded transition"
+                className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-md transition"
                 title="Delete note"
                 aria-label="Delete note"
               >

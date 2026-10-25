@@ -54,13 +54,13 @@ export function PageAnnotationLayer({
                   }}
                   className={`group flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold shadow-md transition-all duration-150 rounded-l-md border-y border-l ${
                     isOpen
-                      ? 'bg-[#fde047] text-amber-950 border-amber-400 ring-2 ring-amber-300 translate-x-[-4px]'
-                      : 'bg-[#fef9c3] hover:bg-[#fde047] text-amber-900 border-amber-300 hover:translate-x-[-3px]'
+                      ? 'bg-amber-400 text-amber-950 border-amber-500 ring-2 ring-amber-300 translate-x-[-4px]'
+                      : 'bg-white dark:bg-neutral-850 hover:bg-amber-50 dark:hover:bg-neutral-800 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-700/60 hover:translate-x-[-3px]'
                   }`}
                   title={note.title || `Sticky Note ${index + 1}`}
                   aria-label={`Open note: ${note.title || `Note ${index + 1}`}`}
                 >
-                  <StickyNote className="w-3.5 h-3.5 text-amber-700 fill-amber-300 shrink-0" />
+                  <StickyNote className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 fill-amber-300 dark:fill-amber-400/30 shrink-0" />
                   <span className="max-w-[120px] truncate text-[11px]">
                     {note.title || `Sticky Note ${index + 1}`}
                   </span>

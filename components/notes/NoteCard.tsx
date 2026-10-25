@@ -36,24 +36,26 @@ export function NoteCard({
 
   return (
     <div
-      className="w-80 max-w-[90vw] bg-[#fef9c3] rounded-sm sm:rounded-md shadow-2xl shadow-amber-950/25 border border-amber-300/80 overflow-hidden text-neutral-800 z-50 animate-in fade-in zoom-in-95 duration-150"
+      className="w-80 max-w-[90vw] bg-white dark:bg-neutral-900 rounded-xl shadow-2xl shadow-black/25 border border-neutral-300 dark:border-neutral-750 overflow-hidden text-neutral-900 dark:text-neutral-100 z-50 animate-in fade-in zoom-in-95 duration-150 transition-all"
       role="region"
       aria-label="Sticky note details"
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Top Simulated Adhesive Tape Header */}
-      <div className="bg-[#fef08a] border-b border-amber-300/60 pt-2 pb-1.5 px-3 flex flex-col items-center">
-        {/* Semi-transparent tape strip */}
-        <div className="h-2 w-20 bg-white/50 backdrop-blur-xs rounded-xs border border-white/60 shadow-2xs mb-1" />
+      {/* Top Header */}
+      <div className="bg-neutral-50 dark:bg-neutral-850 border-b border-neutral-200 dark:border-neutral-800 pt-2 pb-2 px-3 flex flex-col items-center">
+        {/* Subtle pill */}
+        <div className="h-1 w-12 bg-neutral-300 dark:bg-neutral-600 rounded-full mb-1.5" />
 
-        <div className="w-full flex items-center justify-between text-xs font-semibold text-amber-950">
+        <div className="w-full flex items-center justify-between text-xs font-semibold text-neutral-800 dark:text-neutral-100">
           <div className="flex items-center gap-1.5 truncate">
-            <StickyNote className="w-3.5 h-3.5 text-amber-700 fill-amber-400 shrink-0" />
+            <div className="w-5 h-5 rounded-md bg-amber-100 dark:bg-amber-950/60 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+              <StickyNote className="w-3.5 h-3.5 fill-amber-300 dark:fill-amber-400/40" />
+            </div>
             <span className="truncate">{title || (isAnn ? 'Text Annotation' : `Page ${item.pageNumber} Note`)}</span>
           </div>
           <button
             onClick={onClose}
-            className="p-1 text-amber-800 hover:text-rose-700 hover:bg-amber-200/60 rounded transition"
+            className="p-1 text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-md transition"
             aria-label="Close sticky note"
           >
             <X className="w-3.5 h-3.5" />
@@ -63,8 +65,8 @@ export function NoteCard({
 
       {/* Anchor warning if text moved */}
       {anchorWarning && (
-        <div className="flex items-start gap-1.5 px-3 py-1.5 bg-amber-200/70 border-b border-amber-300 text-xs text-amber-900">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <span>{anchorWarning}</span>
         </div>
       )}
@@ -72,33 +74,33 @@ export function NoteCard({
       {/* Quote if annotation */}
       {selectedText && (
         <div className="px-3 pt-2.5">
-          <div className="px-2.5 py-1.5 bg-amber-200/50 border-l-3 border-amber-500 rounded-r-xs text-xs text-amber-950 italic font-serif whitespace-pre-wrap break-words leading-relaxed">
+          <div className="px-2.5 py-1.5 bg-amber-50 dark:bg-amber-950/40 border-l-3 border-amber-400 dark:border-amber-500 rounded-r-md text-xs text-amber-950 dark:text-amber-200 italic font-serif whitespace-pre-wrap break-words leading-relaxed">
             "{selectedText}"
           </div>
         </div>
       )}
 
       {/* Content */}
-      <div className="p-3">
+      <div className="p-3.5 bg-white dark:bg-neutral-900">
         <div
-          className={`text-xs text-amber-950 whitespace-pre-wrap break-words leading-relaxed max-h-64 overflow-y-auto ${
+          className={`text-xs text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap break-words leading-relaxed max-h-64 overflow-y-auto ${
             title?.toLowerCase().includes('code') || /^(\s*#|\s*\/\/|\s*import |\s*def |\s*const |\s*let )/m.test(content)
-              ? 'font-mono text-[11px] bg-amber-200/50 p-2.5 rounded border border-amber-300/70 my-1'
+              ? 'font-mono text-[11px] bg-neutral-100 dark:bg-neutral-800 p-2.5 rounded-md border border-neutral-200 dark:border-neutral-700 my-1'
               : 'font-sans'
           }`}
         >
-          {content || <span className="text-amber-800/50 italic">No note text written yet.</span>}
+          {content || <span className="text-neutral-400 italic">No note text written yet.</span>}
         </div>
       </div>
 
       {/* Source URL if present */}
       {sourceUrl && (
-        <div className="px-3 py-1.5 border-t border-amber-200/60">
+        <div className="px-3.5 py-1.5 border-t border-neutral-100 dark:border-neutral-800">
           <a
             href={sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-900 hover:text-indigo-800 hover:underline truncate max-w-full"
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline truncate max-w-full"
             title={sourceUrl}
           >
             <ExternalLink className="w-3 h-3 shrink-0" />
@@ -108,15 +110,15 @@ export function NoteCard({
       )}
 
       {/* Footer Actions */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-[#fef08a]/60 border-t border-amber-300/50 text-[11px] text-amber-800">
+      <div className="flex items-center justify-between px-3.5 py-2 bg-neutral-50 dark:bg-neutral-850 border-t border-neutral-200 dark:border-neutral-800 text-[11px] text-neutral-600 dark:text-neutral-400">
         <span className="flex items-center gap-1 text-[10px]">
-          <Calendar className="w-3 h-3 text-amber-700" />
+          <Calendar className="w-3 h-3 text-neutral-400" />
           {dateFormatted}
         </span>
         <div className="flex items-center gap-1">
           <button
             onClick={onEdit}
-            className="flex items-center gap-1 px-2 py-0.5 text-amber-900 hover:bg-amber-200/80 rounded transition font-medium"
+            className="flex items-center gap-1 px-2.5 py-1 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-200/60 dark:hover:bg-neutral-700 rounded-md transition font-medium"
             aria-label="Edit note"
           >
             <Edit3 className="w-3 h-3" />
@@ -124,7 +126,7 @@ export function NoteCard({
           </button>
           <button
             onClick={onDelete}
-            className="flex items-center gap-1 px-2 py-0.5 text-rose-700 hover:bg-rose-100 rounded transition font-medium"
+            className="flex items-center gap-1 px-2.5 py-1 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-md transition font-medium"
             aria-label="Delete note"
           >
             <Trash2 className="w-3 h-3" />
