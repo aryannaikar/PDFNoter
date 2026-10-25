@@ -34,13 +34,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const savedInvert = localStorage.getItem('invert_pdf');
       if (savedInvert !== null) {
         setInvertPdfState(savedInvert === 'true');
+      } else {
+        const isSysDark = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const initialDark = savedTheme === 'dark' || (savedTheme !== 'light' && isSysDark);
+        setInvertPdfState(initialDark);
       }
     } catch {
       // Ignore localStorage access restrictions
     }
   }, []);
 
-  // Update .dark class on <html> whenever theme changes
+  // Update .dark class and data-theme on <html> whenever theme changes
   useEffect(() => {
     if (!mounted) return;
 
@@ -60,8 +64,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const root = document.documentElement;
       if (resolved === 'dark') {
         root.classList.add('dark');
+        root.setAttribute('data-theme', 'dark');
       } else {
         root.classList.remove('dark');
+        root.setAttribute('data-theme', 'light');
       }
     };
 
@@ -89,6 +95,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const toggleTheme = () => {
     const next = actualTheme === 'dark' ? 'light' : 'dark';
     setTheme(next);
+    setInvertPdf(next === 'dark');
   };
 
   const setInvertPdf = (nextInvert: boolean) => {

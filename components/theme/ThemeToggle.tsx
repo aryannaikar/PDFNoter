@@ -18,14 +18,14 @@ export function ThemeToggle({ showPdfInvertOption = false, className = '' }: The
       <button
         type="button"
         onClick={toggleTheme}
-        className="p-1.5 rounded-lg text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition active:scale-95"
+        className="p-1.5 rounded-lg text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition active:scale-95 cursor-pointer"
         title={actualTheme === 'dark' ? 'Switch to Light mode' : 'Switch to Dark mode'}
         aria-label={actualTheme === 'dark' ? 'Switch to Light mode' : 'Switch to Dark mode'}
       >
         {actualTheme === 'dark' ? (
           <Sun className="w-4 h-4 text-amber-400 transition-transform duration-200 rotate-0 hover:rotate-45" />
         ) : (
-          <Moon className="w-4 h-4 text-indigo-600 transition-transform duration-200 -rotate-12 hover:rotate-0" />
+          <Moon className="w-4 h-4 text-indigo-600 dark:text-indigo-400 transition-transform duration-200 -rotate-12 hover:rotate-0" />
         )}
       </button>
 
@@ -34,7 +34,7 @@ export function ThemeToggle({ showPdfInvertOption = false, className = '' }: The
         <button
           type="button"
           onClick={toggleInvertPdf}
-          className={`p-1.5 rounded-lg text-xs font-medium transition active:scale-95 flex items-center gap-1 ${
+          className={`p-1.5 rounded-lg text-xs font-medium transition active:scale-95 items-center gap-1 cursor-pointer hidden sm:flex ${
             invertPdf
               ? 'bg-indigo-600 text-white shadow-xs'
               : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800'
