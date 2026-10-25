@@ -484,7 +484,7 @@ export function PdfReaderView({
     annotations.some((a) => a.pageNumber === currentPage);
 
   return (
-    <div className="flex flex-col h-screen w-full bg-neutral-100 overflow-hidden select-none">
+    <div className="flex flex-col h-screen w-full bg-neutral-100 dark:bg-neutral-950 overflow-hidden select-none transition-colors">
       {/* Reader Toolbar */}
       <ReaderToolbar
         fileName={documentRecord.fileName}
@@ -515,21 +515,21 @@ export function PdfReaderView({
         className="flex-1 overflow-y-auto overflow-x-auto relative px-1 sm:px-6 py-2 sm:py-4 pb-20 sm:pb-6 flex flex-col items-center w-full"
       >
         {isLoadingPdf && (
-          <div className="flex flex-col items-center justify-center my-auto py-24 text-neutral-500">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mb-3" />
-            <p className="text-sm font-medium">Loading document pages...</p>
-            <p className="text-xs text-neutral-400 mt-1">Preparing high-definition text layer</p>
+          <div className="flex flex-col items-center justify-center my-auto py-24 text-neutral-500 dark:text-neutral-400">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400 mb-3" />
+            <p className="text-sm font-medium text-neutral-700 dark:text-neutral-200">Loading document pages...</p>
+            <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1">Preparing high-definition text layer</p>
           </div>
         )}
 
         {pdfError && (
-          <div className="max-w-md my-auto p-6 bg-white rounded-xl shadow-lg border border-rose-200 text-center">
+          <div className="max-w-md my-auto p-6 bg-white dark:bg-neutral-900 rounded-xl shadow-lg border border-rose-200 dark:border-rose-900/50 text-center">
             <AlertCircle className="w-10 h-10 text-rose-500 mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-neutral-900 mb-1">Cannot Read Document</h3>
-            <p className="text-xs text-neutral-600 mb-4">{pdfError}</p>
+            <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100 mb-1">Cannot Read Document</h3>
+            <p className="text-xs text-neutral-600 dark:text-neutral-400 mb-4">{pdfError}</p>
             <button
               onClick={onBackToLibrary}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 transition"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition"
             >
               Return to Library
             </button>

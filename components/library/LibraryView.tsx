@@ -22,6 +22,7 @@ import { requestPersistentStorage } from '@/lib/db/database';
 import type { DocumentRecord } from '@/types';
 import { BackupModal } from './BackupModal';
 import { ExportShareModal } from '@/components/export/ExportShareModal';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 interface LibraryViewProps {
   onOpenDocument: (file: File, docRecord: DocumentRecord) => void;
@@ -174,7 +175,7 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
   );
 
   return (
-    <div className="min-h-screen bg-neutral-50/60 text-neutral-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-neutral-50/60 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 flex flex-col font-sans transition-colors duration-200">
       {/* Hidden file inputs */}
       <input
         ref={fileInputRef}
@@ -192,40 +193,42 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
       />
 
       {/* Header */}
-      <header className="border-b border-neutral-200/80 bg-white/80 backdrop-blur-md sticky top-0 z-30">
+      <header className="border-b border-neutral-200/80 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md sticky top-0 z-30 transition-colors">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200 dark:shadow-none">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-base font-bold text-neutral-900 tracking-tight">Offline PDF Study Reader</h1>
-              <p className="text-[11px] text-neutral-500">Local-First • Privacy Focused • Interactive Notes</p>
+              <h1 className="text-base font-bold text-neutral-900 dark:text-neutral-50 tracking-tight">Offline PDF Study Reader</h1>
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Local-First • Privacy Focused • Interactive Notes</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            <ThemeToggle />
+
             <button
               onClick={() => setIsImportModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-700 bg-white hover:bg-neutral-100 border border-neutral-200 rounded-lg shadow-2xs transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-200 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-2xs transition"
               title="Import a shared PDFNoter study package (.pdfnoter)"
             >
-              <Package className="w-3.5 h-3.5 text-indigo-600" />
+              <Package className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
               <span className="hidden sm:inline">Import Study File</span>
               <span className="sm:hidden">Import</span>
             </button>
 
             <button
               onClick={() => setIsBackupOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-700 bg-white hover:bg-neutral-100 border border-neutral-200 rounded-lg shadow-2xs transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-200 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-2xs transition"
             >
-              <Database className="w-3.5 h-3.5 text-neutral-500" />
+              <Database className="w-3.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
               <span>Backup & Restore</span>
             </button>
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-lg shadow-xs shadow-indigo-200 transition"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-lg shadow-xs shadow-indigo-200 dark:shadow-none transition"
             >
               <Upload className="w-3.5 h-3.5" />
               <span>Open PDF</span>
@@ -257,23 +260,23 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
           onClick={() => fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition-all cursor-pointer ${
             isDragging
-              ? 'border-indigo-500 bg-indigo-50/60 scale-[1.01]'
-              : 'border-neutral-300/80 bg-white hover:border-indigo-400 hover:bg-neutral-50/40 shadow-xs'
+              ? 'border-indigo-500 bg-indigo-50/60 dark:bg-indigo-950/40 scale-[1.01]'
+              : 'border-neutral-300/80 dark:border-neutral-800 bg-white dark:bg-neutral-900/80 hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-neutral-50/40 dark:hover:bg-neutral-800/40 shadow-xs'
           }`}
         >
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4">
             <FileUp className="w-7 h-7" />
           </div>
-          <h2 className="text-base font-semibold text-neutral-800 mb-1">
+          <h2 className="text-base font-semibold text-neutral-800 dark:text-neutral-100 mb-1">
             {isProcessing ? 'Verifying document fingerprint...' : 'Choose a PDF or drag and drop it here'}
           </h2>
-          <p className="text-xs text-neutral-500 max-w-md mx-auto mb-4">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-md mx-auto mb-4">
             PDFs remain directly on your device. We compute a SHA-256 fingerprint to associate your notes and reading progress automatically.
           </p>
           <button
             type="button"
             disabled={isProcessing}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-medium rounded-lg transition"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-neutral-900 dark:bg-neutral-100 hover:bg-neutral-800 dark:hover:bg-white text-white dark:text-neutral-900 text-xs font-medium rounded-lg transition"
           >
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Select PDF File</span>
@@ -281,9 +284,9 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
         </div>
 
         {/* Storage Persistence Advisory */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 bg-neutral-100/70 border border-neutral-200/70 rounded-xl text-xs text-neutral-600 gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 bg-neutral-100/70 dark:bg-neutral-900/70 border border-neutral-200/70 dark:border-neutral-800 rounded-xl text-xs text-neutral-600 dark:text-neutral-300 gap-2">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>
               {isStoragePersisted
                 ? 'Persistent storage active: Browser will not evict notes.'
@@ -293,7 +296,7 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
           {!isStoragePersisted && (
             <button
               onClick={handleRequestStorage}
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 underline shrink-0"
+              className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 underline shrink-0"
             >
               Request Persistence
             </button>
@@ -304,8 +307,8 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
         <section className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-neutral-900">Recent Documents</h3>
-              <p className="text-xs text-neutral-500">Previously annotated PDFs</p>
+              <h3 className="text-base font-bold text-neutral-900 dark:text-neutral-100">Recent Documents</h3>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Previously annotated PDFs</p>
             </div>
 
             {documents.length > 0 && (
@@ -315,7 +318,7 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Filter documents..."
-                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-neutral-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg text-neutral-900 dark:text-neutral-100 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20"
                 />
                 <Search className="absolute left-2.5 top-2 w-3.5 h-3.5 text-neutral-400 pointer-events-none" />
               </div>
@@ -323,10 +326,10 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
           </div>
 
           {documents.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-2xl border border-neutral-200/70 p-6">
-              <BookOpen className="w-10 h-10 text-neutral-300 mx-auto mb-3 stroke-1" />
-              <h4 className="text-sm font-semibold text-neutral-700 mb-1">No documents opened yet</h4>
-              <p className="text-xs text-neutral-400 max-w-sm mx-auto">
+            <div className="text-center py-16 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200/70 dark:border-neutral-800 p-6">
+              <BookOpen className="w-10 h-10 text-neutral-300 dark:text-neutral-700 mx-auto mb-3 stroke-1" />
+              <h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-200 mb-1">No documents opened yet</h4>
+              <p className="text-xs text-neutral-400 dark:text-neutral-500 max-w-sm mx-auto">
                 Select your first study PDF above. Add page notes or highlight text, and your explanations stay hidden until you click them.
               </p>
             </div>
@@ -343,15 +346,15 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
                 return (
                   <div
                     key={doc.id}
-                    className="group bg-white rounded-xl border border-neutral-200/80 hover:border-indigo-400/80 p-4 shadow-2xs hover:shadow-md transition flex flex-col justify-between"
+                    className="group bg-white dark:bg-neutral-900/90 rounded-xl border border-neutral-200/80 dark:border-neutral-800 hover:border-indigo-400/80 dark:hover:border-indigo-500 p-4 shadow-2xs hover:shadow-md transition flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                          <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                             <FileText className="w-4 h-4" />
                           </div>
-                          <span className="text-xs font-semibold text-neutral-900 truncate" title={doc.fileName}>
+                          <span className="text-xs font-semibold text-neutral-900 dark:text-neutral-100 truncate" title={doc.fileName}>
                             {doc.fileName}
                           </span>
                         </div>
@@ -364,9 +367,9 @@ export function LibraryView({ onOpenDocument }: LibraryViewProps) {
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-3 text-[11px] text-neutral-500 mb-4">
+                      <div className="flex items-center gap-3 text-[11px] text-neutral-500 dark:text-neutral-400 mb-4">
                         <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-neutral-400" />
+                          <Clock className="w-3 h-3 text-neutral-400 dark:text-neutral-500" />
                           {formattedDate}
                         </span>
                         {doc.pageCount > 0 && <span>• {doc.pageCount} pages</span>}

@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+}
+
+.dark {
+  --background: #090d16;
+  --foreground: #f8fafc;
 }
 
 body {
@@ -13,6 +20,16 @@ body {
   padding: 0;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+.dark body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Inverted PDF page filter for eye-friendly dark reading */
+.dark-pdf-canvas {
+  filter: invert(0.9) hue-rotate(180deg) brightness(0.95) contrast(0.9);
 }
 
 /* PDF.js Text Layer styling for accurate text selection */
@@ -57,4 +74,11 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 116, 139, 0.7);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.6);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
 }

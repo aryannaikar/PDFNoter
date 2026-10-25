@@ -87,7 +87,7 @@ export function SearchBar({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute top-14 left-2 right-2 sm:left-auto sm:right-4 z-40 sm:w-96 bg-white rounded-xl shadow-2xl border border-neutral-200/90 p-3 animate-in fade-in slide-in-from-top-2 duration-150">
+    <div className="absolute top-14 left-2 right-2 sm:left-auto sm:right-4 z-40 sm:w-96 bg-white dark:bg-neutral-900 rounded-xl shadow-2xl border border-neutral-200/90 dark:border-neutral-800 p-3 animate-in fade-in slide-in-from-top-2 duration-150 transition-colors">
       <form onSubmit={handleSearch} className="flex items-center gap-2">
         <div className="relative flex-1">
           <input
@@ -96,16 +96,16 @@ export function SearchBar({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search document text..."
             autoFocus
-            className="w-full pl-8 pr-3 py-1.5 text-xs bg-neutral-50 border border-neutral-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition"
+            className="w-full pl-8 pr-3 py-1.5 text-xs bg-neutral-50 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition"
           />
-          <Search className="absolute left-2.5 top-2 w-3.5 h-3.5 text-neutral-400 pointer-events-none" />
+          <Search className="absolute left-2.5 top-2 w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500 pointer-events-none" />
         </div>
 
         <button
           type="button"
           onClick={handlePrev}
           disabled={matches.length === 0}
-          className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 disabled:opacity-30 rounded transition"
+          className="p-1.5 text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 disabled:opacity-30 rounded transition"
           title="Previous match"
           aria-label="Previous match"
         >
@@ -116,7 +116,7 @@ export function SearchBar({
           type="button"
           onClick={handleNext}
           disabled={matches.length === 0}
-          className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 disabled:opacity-30 rounded transition"
+          className="p-1.5 text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 disabled:opacity-30 rounded transition"
           title="Next match"
           aria-label="Next match"
         >
@@ -126,7 +126,7 @@ export function SearchBar({
         <button
           type="button"
           onClick={onClose}
-          className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded transition"
+          className="p-1.5 text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded transition"
           title="Close search"
           aria-label="Close search"
         >
@@ -135,9 +135,9 @@ export function SearchBar({
       </form>
 
       {/* Status Line */}
-      <div className="mt-2 flex items-center justify-between text-[11px] text-neutral-500 px-1">
+      <div className="mt-2 flex items-center justify-between text-[11px] text-neutral-500 dark:text-neutral-400 px-1">
         {isSearching ? (
-          <div className="flex items-center gap-1.5 text-indigo-600">
+          <div className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400">
             <Loader2 className="w-3 h-3 animate-spin" />
             <span>
               Searching pages ({progress?.current || 0}/{progress?.total || pdfDoc.numPages})...
@@ -148,7 +148,7 @@ export function SearchBar({
             <span>
               Match {currentIndex + 1} of {matches.length}
             </span>
-            <span className="text-neutral-400">Page {matches[currentIndex]?.pageNumber}</span>
+            <span className="text-neutral-400 dark:text-neutral-500">Page {matches[currentIndex]?.pageNumber}</span>
           </div>
         ) : query.trim() ? (
           <span>No matches found</span>
@@ -159,15 +159,15 @@ export function SearchBar({
 
       {/* Snippet preview */}
       {matches.length > 0 && currentIndex >= 0 && (
-        <div className="mt-2 p-2 bg-neutral-50 rounded text-xs text-neutral-700 italic border border-neutral-100 max-h-16 overflow-y-auto">
+        <div className="mt-2 p-2 bg-neutral-50 dark:bg-neutral-800/60 rounded text-xs text-neutral-700 dark:text-neutral-300 italic border border-neutral-100 dark:border-neutral-750 max-h-16 overflow-y-auto">
           "{matches[currentIndex]?.snippet}"
         </div>
       )}
 
       {/* Scanned PDF warning if 0 text extracted */}
       {hasScannedWarning && (
-        <div className="mt-2 p-2.5 bg-amber-50 rounded border border-amber-200 text-xs text-amber-800 flex items-start gap-1.5">
-          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+        <div className="mt-2 p-2.5 bg-amber-50 dark:bg-amber-950/40 rounded border border-amber-200 dark:border-amber-800/50 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-1.5">
+          <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <span>
             This PDF appears to be a scanned image without a text layer. Text search requires machine-readable text. OCR support will be available in future updates.
           </span>

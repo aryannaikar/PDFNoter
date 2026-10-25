@@ -7,6 +7,7 @@ import type { NoteRecord, AnnotationRecord } from '@/types';
 import { PageAnnotationLayer } from './PageAnnotationLayer';
 import { extractSelectionAnchor } from '@/lib/pdf/selection';
 import { Highlighter } from 'lucide-react';
+import { useTheme } from '@/components/theme/ThemeProvider';
 
 interface PdfPageItemProps {
   pdfDoc: PDFDocumentProxy;
@@ -38,6 +39,7 @@ export function PdfPageItem({
   onEditAnnotation,
   onDeleteAnnotation,
 }: PdfPageItemProps) {
+  const { invertPdf } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textLayerRef = useRef<HTMLDivElement>(null);
@@ -238,12 +240,19 @@ export function PdfPageItem({
         width: `${dimensions.width}px`,
         height: `${dimensions.height}px`,
       }}
-      className="relative mx-auto my-2 sm:my-6 bg-white shadow-md sm:shadow-xl rounded-sm sm:rounded-md transition-shadow select-text"
+      className={`relative mx-auto my-2 sm:my-6 bg-white dark:bg-neutral-900 shadow-md sm:shadow-xl rounded-sm sm:rounded-md transition-shadow select-text ${
+        invertPdf ? 'ring-1 ring-neutral-800' : ''
+      }`}
     >
       {isVisible ? (
         <>
           {/* Canvas Layer */}
-          <canvas ref={canvasRef} className="block rounded-sm sm:rounded-md" />
+          <canvas
+            ref={canvasRef}
+            className={`block rounded-sm sm:rounded-md transition-all duration-200 ${
+              invertPdf ? 'dark-pdf-canvas' : ''
+            }`}
+          />
 
           {/* PDF.js Text Selection Layer */}
           <div
@@ -281,9 +290,9 @@ export function PdfPageItem({
                 type="button"
                 onMouseDown={(e) => e.preventDefault()} // prevent clearing selection on click
                 onClick={handleCreateAnnotation}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 text-white hover:bg-neutral-800 text-xs font-medium rounded-full shadow-lg transition active:scale-95"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-white text-xs font-medium rounded-full shadow-lg transition active:scale-95"
               >
-                <Highlighter className="w-3.5 h-3.5 text-amber-400" />
+                <Highlighter className="w-3.5 h-3.5 text-amber-400 dark:text-amber-600" />
                 <span>Add study note</span>
               </button>
             </div>
@@ -291,7 +300,7 @@ export function PdfPageItem({
         </>
       ) : (
         /* Placeholder while scrolling far away (saves memory) */
-        <div className="w-full h-full flex items-center justify-center bg-neutral-50/50 rounded-md border border-neutral-100 text-neutral-300 text-xs">
+        <div className="w-full h-full flex items-center justify-center bg-neutral-50/50 dark:bg-neutral-900/50 rounded-md border border-neutral-100 dark:border-neutral-800 text-neutral-300 dark:text-neutral-600 text-xs">
           Page {pageNumber}
         </div>
       )}
