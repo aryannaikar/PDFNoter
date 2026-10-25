@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import type { NoteRecord, AnnotationRecord } from '@/types';
 import { denormalizeRect, verifyAnchor } from '@/lib/pdf/selection';
 import { NoteCard } from '@/components/notes/NoteCard';
-import { MessageSquare, Highlighter } from 'lucide-react';
+import { StickyNote, Highlighter } from 'lucide-react';
 
 interface PageAnnotationLayerProps {
   pageNumber: number;
@@ -39,30 +39,30 @@ export function PageAnnotationLayer({
       className="absolute inset-0 pointer-events-none z-20 overflow-visible"
       style={{ width: pageWidth, height: pageHeight }}
     >
-      {/* 1. Page-level Notes Markers (positioned neatly in the right margin / corner) */}
+      {/* 1. Page-level Sticky Note Tabs (attached cleanly to the right edge of the page) */}
       {pageNotes.length > 0 && (
-        <div className="absolute top-3 right-3 flex flex-col gap-2 pointer-events-auto z-30">
+        <div className="absolute top-3 right-0 flex flex-col gap-2 pointer-events-auto z-30">
           {pageNotes.map((note, index) => {
             const isOpen = activeItemId === note.id;
             return (
-              <div key={note.id} className="relative">
+              <div key={note.id} className="relative flex justify-end">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setActiveItemId(isOpen ? null : note.id);
                   }}
-                  className={`group flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium shadow-md transition-all duration-200 ${
+                  className={`group flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold shadow-md transition-all duration-150 rounded-l-md border-y border-l ${
                     isOpen
-                      ? 'bg-indigo-600 text-white ring-2 ring-indigo-300'
-                      : 'bg-white/95 text-indigo-700 hover:bg-indigo-50 border border-indigo-200/80 backdrop-blur-xs'
+                      ? 'bg-[#fde047] text-amber-950 border-amber-400 ring-2 ring-amber-300 translate-x-[-4px]'
+                      : 'bg-[#fef9c3] hover:bg-[#fde047] text-amber-900 border-amber-300 hover:translate-x-[-3px]'
                   }`}
-                  title={note.title || `Page note ${index + 1}`}
+                  title={note.title || `Sticky Note ${index + 1}`}
                   aria-label={`Open note: ${note.title || `Note ${index + 1}`}`}
                 >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  <span className="max-w-[100px] truncate text-[11px]">
-                    {note.title || `Note ${index + 1}`}
+                  <StickyNote className="w-3.5 h-3.5 text-amber-700 fill-amber-300 shrink-0" />
+                  <span className="max-w-[120px] truncate text-[11px]">
+                    {note.title || `Sticky Note ${index + 1}`}
                   </span>
                 </button>
 

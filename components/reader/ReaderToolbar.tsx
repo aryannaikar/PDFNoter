@@ -10,7 +10,7 @@ import {
   Maximize2,
   Search,
   Bookmark,
-  FileText,
+  StickyNote,
   Plus,
   Share2,
 } from 'lucide-react';
@@ -197,14 +197,14 @@ export function ReaderToolbar({
             onClick={onOpenNotes}
             className={`relative flex items-center gap-1 p-1.5 sm:px-2 sm:py-1.5 rounded-lg text-xs font-medium transition ${
               hasNotesOnCurrentPage
-                ? 'bg-amber-100 text-amber-900 hover:bg-amber-200'
+                ? 'bg-amber-100 text-amber-950 hover:bg-amber-200 border border-amber-300'
                 : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
             }`}
-            title="View all notes"
-            aria-label="View all notes"
+            title="Open sticky notes on this page"
+            aria-label="Open sticky notes"
           >
-            <FileText className="w-4 h-4" />
-            <span className="text-[11px] font-semibold">{notesCount}</span>
+            <StickyNote className="w-4 h-4 text-amber-600 fill-amber-300 shrink-0" />
+            <span className="text-[11px] font-bold">{notesCount}</span>
             {hasNotesOnCurrentPage && (
               <span
                 className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-amber-500 rounded-full ring-2 ring-white"

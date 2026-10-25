@@ -14,6 +14,7 @@ import { ReaderToolbar } from './ReaderToolbar';
 import { SearchBar } from './SearchBar';
 import { BookmarksDrawer } from './BookmarksDrawer';
 import { NotesDrawer } from './NotesDrawer';
+import { StickyNoteWindow } from '@/components/notes/StickyNoteWindow';
 import { NoteEditorModal, NoteEditorData } from '@/components/notes/NoteEditorModal';
 import { ExportShareModal } from '@/components/export/ExportShareModal';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -46,7 +47,8 @@ export function PdfReaderView({
   // Modals & Panels
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
-  const [isNotesOpen, setIsNotesOpen] = useState(false);
+  const [isStickyNoteOpen, setIsStickyNoteOpen] = useState(false);
+  const [isNotesDrawerOpen, setIsNotesDrawerOpen] = useState(false);
   const [isExportShareOpen, setIsExportShareOpen] = useState(false);
 
   // Editor modal state
@@ -276,7 +278,8 @@ export function PdfReaderView({
       } else if (e.key === 'Escape') {
         setIsSearchOpen(false);
         setIsBookmarksOpen(false);
-        setIsNotesOpen(false);
+        setIsStickyNoteOpen(false);
+        setIsNotesDrawerOpen(false);
         if (editorState.isOpen) {
           setEditorState((prev) => ({ ...prev, isOpen: false }));
         }
@@ -500,7 +503,7 @@ export function PdfReaderView({
         onFitWidth={handleFitWidth}
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenBookmarks={() => setIsBookmarksOpen(true)}
-        onOpenNotes={() => setIsNotesOpen(true)}
+        onOpenNotes={() => setIsStickyNoteOpen((prev) => !prev)}
         onOpenExportShare={() => setIsExportShareOpen(true)}
         onAddPageNote={handleAddPageNote}
       />
@@ -575,12 +578,31 @@ export function PdfReaderView({
         onDeleteBookmark={handleDeleteBookmark}
       />
 
-      {/* Notes Drawer */}
-      <NotesDrawer
-        isOpen={isNotesOpen}
+      {/* Sticky Note Window on PDF */}
+      <StickyNoteWindow
+        isOpen={isStickyNoteOpen}
+        currentPage={currentPage}
         notes={notes}
         annotations={annotations}
-        onClose={() => setIsNotesOpen(false)}
+        onClose={() => setIsStickyNoteOpen(false)}
+        onNavigateToPage={scrollToPage}
+        onEditNote={handleEditNote}
+        onDeleteNote={handleDeleteNote}
+        onEditAnnotation={handleEditAnnotation}
+        onDeleteAnnotation={handleDeleteAnnotation}
+        onAddNote={handleAddPageNote}
+        onOpenFullList={() => {
+          setIsStickyNoteOpen(false);
+          setIsNotesDrawerOpen(true);
+        }}
+      />
+
+      {/* Optional Full Notes Drawer */}
+      <NotesDrawer
+        isOpen={isNotesDrawerOpen}
+        notes={notes}
+        annotations={annotations}
+        onClose={() => setIsNotesDrawerOpen(false)}
         onNavigateToPage={scrollToPage}
       />
 
