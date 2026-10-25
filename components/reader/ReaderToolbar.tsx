@@ -224,8 +224,8 @@ export function ReaderToolbar({
             <Share2 className="w-4 h-4" />
           </button>
 
-          {/* Theme & Night PDF Filter Toggle */}
-          <ThemeToggle showPdfInvertOption={true} />
+          {/* Theme Toggle (Light / Dark UI) */}
+          <ThemeToggle showPdfInvertOption={false} />
 
           {/* Primary Action: Add Page Note */}
           <button

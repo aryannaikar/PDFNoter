@@ -7,7 +7,6 @@ import type { NoteRecord, AnnotationRecord } from '@/types';
 import { PageAnnotationLayer } from './PageAnnotationLayer';
 import { extractSelectionAnchor } from '@/lib/pdf/selection';
 import { Highlighter } from 'lucide-react';
-import { useTheme } from '@/components/theme/ThemeProvider';
 
 interface PdfPageItemProps {
   pdfDoc: PDFDocumentProxy;
@@ -39,7 +38,6 @@ export function PdfPageItem({
   onEditAnnotation,
   onDeleteAnnotation,
 }: PdfPageItemProps) {
-  const { invertPdf } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textLayerRef = useRef<HTMLDivElement>(null);
@@ -240,18 +238,14 @@ export function PdfPageItem({
         width: `${dimensions.width}px`,
         height: `${dimensions.height}px`,
       }}
-      className={`relative mx-auto my-2 sm:my-6 bg-white dark:bg-neutral-900 shadow-md sm:shadow-xl rounded-sm sm:rounded-md transition-shadow select-text ${
-        invertPdf ? 'ring-1 ring-neutral-800' : ''
-      }`}
+      className="relative mx-auto my-2 sm:my-6 bg-white shadow-md sm:shadow-xl rounded-sm sm:rounded-md transition-shadow select-text"
     >
       {isVisible ? (
         <>
-          {/* Canvas Layer */}
+          {/* Canvas Layer - Authentic document colors preserved in dark mode */}
           <canvas
             ref={canvasRef}
-            className={`block rounded-sm sm:rounded-md transition-all duration-200 ${
-              invertPdf ? 'dark-pdf-canvas' : ''
-            }`}
+            className="block rounded-sm sm:rounded-md transition-all duration-200"
           />
 
           {/* PDF.js Text Selection Layer */}
