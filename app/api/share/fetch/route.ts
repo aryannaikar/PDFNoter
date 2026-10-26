@@ -20,6 +20,8 @@ export async function GET(req: NextRequest) {
     // Security check: ensure URL belongs to trusted/known file host providers
     const parsed = new URL(targetUrl);
     const allowedHosts = [
+      'firebasestorage.googleapis.com',
+      'storage.googleapis.com',
       'tmpfiles.org',
       'files.catbox.moe',
       'catbox.moe',

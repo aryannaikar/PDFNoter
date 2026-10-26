@@ -32,6 +32,7 @@ import { exportAnnotatedStandardPdf } from '@/lib/export/pdfAnnotationExporter';
 import { exportStudyFile, downloadBlob } from '@/lib/export/studyFileExporter';
 import { validateStudyFile, commitStudyFileImport } from '@/lib/export/studyFileImporter';
 import { compressDataUrl } from '@/lib/utils/image';
+import { uploadStudyPackageToFirebase } from '@/lib/firebase/storageService';
 
 interface ExportShareModalProps {
   isOpen: boolean;
@@ -148,53 +149,63 @@ export function ExportShareModal({
         }
       );
 
-      // Check Vercel serverless function payload limit (~4.5MB)
-      const maxCloudBytes = 4.2 * 1024 * 1024;
-      if (blob.size > maxCloudBytes) {
-        const sizeMb = (blob.size / (1024 * 1024)).toFixed(1);
-        throw new Error(
-          `Document package is ${sizeMb}MB. Cloud link hosting supports up to 4.2MB. Please use the ".pdfnoter File" tab to download and share the full file directly.`
-        );
-      }
-
-      setProgressPercent(50);
-      setProgressMessage('Uploading study package to cloud storage...');
-
-      const formData = new FormData();
       const fileName = `${documentRecord.fileName.replace(/\.pdf$/i, '')}.pdfnoter`;
-      formData.append('file', blob, fileName);
+      let downloadUrl = '';
 
-      const res = await fetch('/api/share/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      // 1. Direct browser-to-Firebase Storage upload (supports files of any size without Vercel payload limits)
+      try {
+        setProgressPercent(50);
+        setProgressMessage('Uploading study package to Firebase Storage...');
+        downloadUrl = await uploadStudyPackageToFirebase(blob, fileName, (pct, msg) => {
+          setProgressPercent(Math.min(96, 45 + Math.round(pct * 0.5)));
+          setProgressMessage(msg);
+        });
+      } catch (fbErr: any) {
+        console.warn('Firebase direct upload error, attempting fallback...', fbErr);
 
-      if (!res.ok) {
-        let errorMsg = '';
-        try {
-          const errJson = await res.json();
-          errorMsg = errJson.error;
-        } catch {
-          const text = await res.text().catch(() => '');
-          if (res.status === 413) {
-            errorMsg = `Document package is too large for web link upload (${(blob.size / (1024 * 1024)).toFixed(1)}MB, max ~4.2MB). Please share using the ".pdfnoter File" tab.`;
-          } else if (text) {
-            errorMsg = text.slice(0, 120);
+        // Fallback: if package is under 4.2MB, try server route
+        if (blob.size <= 4.2 * 1024 * 1024) {
+          setProgressMessage('Uploading via cloud fallback...');
+          const formData = new FormData();
+          formData.append('file', blob, fileName);
+
+          const res = await fetch('/api/share/upload', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!res.ok) {
+            let errorMsg = '';
+            try {
+              const errJson = await res.json();
+              errorMsg = errJson.error;
+            } catch {
+              const text = await res.text().catch(() => '');
+              errorMsg = text.slice(0, 120);
+            }
+            throw new Error(errorMsg || `Upload failed (status: ${res.status})`);
           }
+
+          const data = await res.json();
+          downloadUrl = data.downloadUrl;
+        } else {
+          const sizeMb = (blob.size / (1024 * 1024)).toFixed(1);
+          const fbMsg = fbErr?.message || fbErr?.code || 'Permission denied';
+          throw new Error(
+            `Firebase storage error (${fbMsg}). Package size is ${sizeMb}MB. Please make sure Firebase Storage security rules allow write access, or share via the ".pdfnoter File" tab.`
+          );
         }
-        throw new Error(errorMsg || `Upload failed (status: ${res.status})`);
       }
 
-      const data = await res.json();
-      if (!data.downloadUrl) {
-        throw new Error('No download URL returned from cloud upload');
+      if (!downloadUrl) {
+        throw new Error('No download URL returned from cloud storage upload');
       }
 
       setProgressPercent(100);
       setProgressMessage('Shareable link ready!');
 
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const shareUrl = `${origin}/share?src=${encodeURIComponent(data.downloadUrl)}&name=${encodeURIComponent(documentRecord.fileName)}`;
+      const shareUrl = `${origin}/share?src=${encodeURIComponent(downloadUrl)}&name=${encodeURIComponent(documentRecord.fileName)}`;
 
       setGeneratedShareLink(shareUrl);
       setStatusMessage({
