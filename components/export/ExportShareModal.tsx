@@ -14,6 +14,11 @@ import {
   Info,
   ArrowRight,
   FileUp,
+  Link2,
+  Copy,
+  Check,
+  ExternalLink,
+  Sparkles,
 } from 'lucide-react';
 import type {
   DocumentRecord,
@@ -37,7 +42,7 @@ interface ExportShareModalProps {
   bookmarks?: BookmarkRecord[];
   readingProgress?: ReadingProgressRecord;
   onImportSuccess?: (file: File, docRecord: DocumentRecord) => void;
-  defaultTab?: 'standard' | 'studyfile' | 'import';
+  defaultTab?: 'sharelink' | 'standard' | 'studyfile' | 'import';
 }
 
 export function ExportShareModal({
@@ -50,16 +55,20 @@ export function ExportShareModal({
   bookmarks = [],
   readingProgress,
   onImportSuccess,
-  defaultTab = 'standard',
+  defaultTab = 'sharelink',
 }: ExportShareModalProps) {
-  const [activeTab, setActiveTab] = useState<'standard' | 'studyfile' | 'import'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<'sharelink' | 'standard' | 'studyfile' | 'import'>(defaultTab);
+
+  // Web Share Link state
+  const [generatedShareLink, setGeneratedShareLink] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
   // Standard PDF options
   const [includeHighlights, setIncludeHighlights] = useState(true);
   const [includePageMarkers, setIncludePageMarkers] = useState(true);
   const [appendNotesPages, setAppendNotesPages] = useState(true);
 
-  // Study File options
+  // Study File / Share link options
   const [includeOriginalPdf, setIncludeOriginalPdf] = useState(true);
   const [includeNotes, setIncludeNotes] = useState(true);
   const [includeAnnotations, setIncludeAnnotations] = useState(true);
@@ -80,7 +89,90 @@ export function ExportShareModal({
 
   const baseFileName = documentRecord?.fileName.replace(/\.pdf$/i, '') || 'study_document';
 
-  // --- 1. Export as Standard PDF ---
+  // --- 1. Generate Web Share Link (Editable) ---
+  const handleGenerateShareLink = async () => {
+    if (!pdfFile || !documentRecord) {
+      setStatusMessage({ type: 'error', text: 'Document record is missing.' });
+      return;
+    }
+
+    setIsProcessing(true);
+    setStatusMessage(null);
+    setProgressPercent(15);
+    setProgressMessage('Bundling PDF and interactive notes...');
+
+    try {
+      const buffer = await pdfFile.arrayBuffer();
+
+      const blob = await exportStudyFile(
+        buffer,
+        documentRecord,
+        includeNotes ? notes : [],
+        includeAnnotations ? annotations : [],
+        includeBookmarks ? bookmarks : [],
+        readingProgress,
+        {
+          includeOriginalPdf: true,
+          includeNotes,
+          includeAnnotations,
+          includeBookmarks,
+          includeReadingProgress: true,
+        },
+        (percent, message) => {
+          setProgressPercent(Math.round(percent * 0.45));
+          setProgressMessage(message);
+        }
+      );
+
+      setProgressPercent(50);
+      setProgressMessage('Uploading study package to cloud storage...');
+
+      const formData = new FormData();
+      const fileName = `${documentRecord.fileName.replace(/\.pdf$/i, '')}.pdfnoter`;
+      formData.append('file', blob, fileName);
+
+      const res = await fetch('/api/share/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || 'Failed to upload shared document');
+      }
+
+      const data = await res.json();
+      if (!data.downloadUrl) {
+        throw new Error('No download URL returned from cloud upload');
+      }
+
+      setProgressPercent(100);
+      setProgressMessage('Shareable link ready!');
+
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const shareUrl = `${origin}/share?src=${encodeURIComponent(data.downloadUrl)}&name=${encodeURIComponent(documentRecord.fileName)}`;
+
+      setGeneratedShareLink(shareUrl);
+      setStatusMessage({
+        type: 'success',
+        text: 'Shareable link created! Anyone with this link can view and edit the PDF with all your notes.',
+      });
+    } catch (err: any) {
+      console.error('Share link generation error:', err);
+      setStatusMessage({ type: 'error', text: `Failed to create share link: ${err.message || 'Unknown error'}` });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (!generatedShareLink) return;
+    navigator.clipboard.writeText(generatedShareLink);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2500);
+  };
+
+  // --- 2. Export as Standard PDF ---
   const handleExportStandardPdf = async () => {
     if (!pdfFile) {
       setStatusMessage({ type: 'error', text: 'PDF file data is not loaded in memory.' });
@@ -116,7 +208,7 @@ export function ExportShareModal({
 
       setStatusMessage({
         type: 'success',
-        text: 'Standard PDF exported successfully with embedded study annotations!',
+        text: 'Standard PDF exported successfully with embedded study notes and diagrams!',
       });
     } catch (err: any) {
       console.error('Export standard PDF error:', err);
@@ -126,7 +218,7 @@ export function ExportShareModal({
     }
   };
 
-  // --- 2. Export as PDFNoter Study File ---
+  // --- 3. Export as PDFNoter Study File ---
   const handleExportStudyFile = async () => {
     if (!pdfFile || !documentRecord) {
       setStatusMessage({ type: 'error', text: 'Document record is missing.' });
@@ -175,7 +267,7 @@ export function ExportShareModal({
     }
   };
 
-  // --- 3. Import PDFNoter Study File ---
+  // --- 4. Import PDFNoter Study File ---
   const handleSelectImportFile = async (file: File) => {
     if (!file.name.toLowerCase().endsWith('.pdfnoter') && !file.name.toLowerCase().endsWith('.zip')) {
       setStatusMessage({
@@ -237,7 +329,7 @@ export function ExportShareModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in duration-150">
       <div
         className="w-full max-w-xl bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden flex flex-col max-h-[92vh] transition-colors"
         role="dialog"
@@ -252,28 +344,48 @@ export function ExportShareModal({
               <h2 id="export-share-title" className="text-base font-bold text-neutral-800 dark:text-neutral-100">
                 Export & Share
               </h2>
-              <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate max-w-sm">
                 {documentRecord ? documentRecord.fileName : 'Study Session Exchange'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-200/50 dark:hover:bg-neutral-800 rounded-lg transition"
-            aria-label="Close export dialog"
+            className="p-1.5 text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-200 rounded-lg hover:bg-neutral-200/50 dark:hover:bg-neutral-800 transition cursor-pointer"
+            aria-label="Close modal"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-neutral-200 dark:border-neutral-800 px-5 bg-neutral-50/40 dark:bg-neutral-900/40 text-xs font-medium">
+        <div className="flex border-b border-neutral-200 dark:border-neutral-800 px-4 bg-neutral-50/40 dark:bg-neutral-900/40 text-xs font-medium overflow-x-auto">
+          {/* TAB 1: Share Link */}
+          <button
+            onClick={() => {
+              setActiveTab('sharelink');
+              setStatusMessage(null);
+            }}
+            className={`py-2.5 px-3 border-b-2 flex items-center gap-1.5 shrink-0 transition cursor-pointer ${
+              activeTab === 'sharelink'
+                ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 font-semibold'
+                : 'border-transparent text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200'
+            }`}
+          >
+            <Link2 className="w-3.5 h-3.5" />
+            <span>Share Link (Editable)</span>
+            <span className="px-1 py-0.2 bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 rounded text-[9px] font-bold">
+              NEW
+            </span>
+          </button>
+
+          {/* TAB 2: Standard PDF */}
           <button
             onClick={() => {
               setActiveTab('standard');
               setStatusMessage(null);
             }}
-            className={`py-2.5 px-3 border-b-2 flex items-center gap-1.5 transition ${
+            className={`py-2.5 px-3 border-b-2 flex items-center gap-1.5 shrink-0 transition cursor-pointer ${
               activeTab === 'standard'
                 ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 font-semibold'
                 : 'border-transparent text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200'
@@ -282,33 +394,37 @@ export function ExportShareModal({
             <FileText className="w-3.5 h-3.5" />
             <span>Standard PDF</span>
           </button>
+
+          {/* TAB 3: Study File */}
           <button
             onClick={() => {
               setActiveTab('studyfile');
               setStatusMessage(null);
             }}
-            className={`py-2.5 px-3 border-b-2 flex items-center gap-1.5 transition ${
+            className={`py-2.5 px-3 border-b-2 flex items-center gap-1.5 shrink-0 transition cursor-pointer ${
               activeTab === 'studyfile'
                 ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 font-semibold'
                 : 'border-transparent text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200'
             }`}
           >
             <Package className="w-3.5 h-3.5" />
-            <span>PDFNoter File (.pdfnoter)</span>
+            <span>.pdfnoter File</span>
           </button>
+
+          {/* TAB 4: Import */}
           <button
             onClick={() => {
               setActiveTab('import');
               setStatusMessage(null);
             }}
-            className={`py-2.5 px-3 border-b-2 flex items-center gap-1.5 transition ${
+            className={`py-2.5 px-3 border-b-2 flex items-center gap-1.5 shrink-0 transition cursor-pointer ${
               activeTab === 'import'
                 ? 'border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 font-semibold'
                 : 'border-transparent text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200'
             }`}
           >
             <Upload className="w-3.5 h-3.5" />
-            <span>Import Study File</span>
+            <span>Import</span>
           </button>
         </div>
 
@@ -328,7 +444,7 @@ export function ExportShareModal({
               ) : (
                 <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
               )}
-              <div className="flex-1">{statusMessage.text}</div>
+              <div className="flex-1 leading-relaxed">{statusMessage.text}</div>
             </div>
           )}
 
@@ -351,7 +467,125 @@ export function ExportShareModal({
             </div>
           )}
 
-          {/* TAB 1: Standard PDF */}
+          {/* TAB 1: Share Link (Interactive & Editable) */}
+          {activeTab === 'sharelink' && (
+            <div className="space-y-4">
+              <div className="flex items-start gap-2 p-3 bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 rounded-xl text-xs text-indigo-900 dark:text-indigo-200 leading-relaxed">
+                <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <span>
+                  Creates a <strong>direct web link</strong> containing this PDF and all your notes. Anyone who opens the link will view the document with your notes and can <strong>edit, add new notes, or attach pictures directly in their browser</strong>.
+                </span>
+              </div>
+
+              {/* Share Options */}
+              <div className="space-y-2.5 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 bg-white dark:bg-neutral-850">
+                <h3 className="text-xs font-semibold text-neutral-800 dark:text-neutral-100 uppercase tracking-wider">
+                  Included Study Elements
+                </h3>
+
+                <label className="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={includeNotes}
+                    onChange={(e) => setIncludeNotes(e.target.checked)}
+                    className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                  />
+                  <span>Page notes & attached pictures ({notes.length} total)</span>
+                </label>
+
+                <label className="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={includeAnnotations}
+                    onChange={(e) => setIncludeAnnotations(e.target.checked)}
+                    className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                  />
+                  <span>Text highlights & inline notes ({annotations.length} total)</span>
+                </label>
+
+                <label className="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={includeBookmarks}
+                    onChange={(e) => setIncludeBookmarks(e.target.checked)}
+                    className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                  />
+                  <span>Page bookmarks ({bookmarks.length} total)</span>
+                </label>
+              </div>
+
+              {/* Generated Link Display */}
+              {generatedShareLink ? (
+                <div className="space-y-3 p-4 bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
+                      <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <span>Your Share Link is Ready!</span>
+                    </span>
+                    <span className="text-[11px] text-emerald-700 dark:text-emerald-400">Zero setup required</span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={generatedShareLink}
+                      className="flex-1 px-3 py-2 text-xs bg-white dark:bg-neutral-900 border border-emerald-300 dark:border-emerald-700 rounded-lg text-neutral-900 dark:text-neutral-100 font-mono select-all focus:outline-hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyLink}
+                      className={`px-3 py-2 text-xs font-medium rounded-lg flex items-center gap-1.5 transition cursor-pointer shadow-xs ${
+                        isCopied
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                      }`}
+                    >
+                      {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{isCopied ? 'Copied!' : 'Copy Link'}</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <a
+                      href={generatedShareLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                    >
+                      <span>Open link in new tab to test</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={handleGenerateShareLink}
+                      disabled={isProcessing}
+                      className="text-xs text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 underline cursor-pointer"
+                    >
+                      Update / Regenerate Link
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleGenerateShareLink}
+                  disabled={isProcessing}
+                  className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
+                >
+                  {isProcessing ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Link2 className="w-4 h-4" />
+                  )}
+                  <span>{isProcessing ? 'Generating Share Link...' : 'Generate Shareable Web Link'}</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* TAB 2: Standard PDF */}
           {activeTab === 'standard' && (
             <div className="space-y-4">
               <div className="flex items-start gap-2 p-3 bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 rounded-xl text-xs text-indigo-900 dark:text-indigo-200 leading-relaxed">
@@ -393,44 +627,39 @@ export function ExportShareModal({
                     onChange={(e) => setAppendNotesPages(e.target.checked)}
                     className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                   />
-                  <span>Append study notes summary pages at the end of the PDF</span>
+                  <span>Append study notes & diagram summary pages at the end of the PDF</span>
                 </label>
               </div>
 
-              <div className="pt-2 flex items-center justify-between">
-                <span className="text-[11px] text-neutral-400 dark:text-neutral-500">
-                  {notes.length} page notes • {annotations.length} highlights
-                </span>
-                <button
-                  type="button"
-                  onClick={handleExportStandardPdf}
-                  disabled={isProcessing || !pdfFile}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-medium rounded-lg shadow-xs transition disabled:opacity-50"
-                >
-                  {isProcessing ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Download className="w-3.5 h-3.5" />
-                  )}
-                  <span>{isProcessing ? progressMessage || 'Exporting...' : 'Export Standard PDF'}</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleExportStandardPdf}
+                disabled={isProcessing}
+                className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
+              >
+                {isProcessing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                <span>Export Standard PDF</span>
+              </button>
             </div>
           )}
 
-          {/* TAB 2: PDFNoter Study File (.pdfnoter) */}
+          {/* TAB 3: Study File (.pdfnoter) */}
           {activeTab === 'studyfile' && (
             <div className="space-y-4">
-              <div className="flex items-start gap-2 p-3 bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/50 rounded-xl text-xs text-amber-950 dark:text-amber-200 leading-relaxed">
+              <div className="flex items-start gap-2 p-3 bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 rounded-xl text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
                 <Package className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <span>
-                  Creates an all-in-one <strong>.pdfnoter</strong> study package containing the original PDF and your editable hidden study notes. When shared and opened in PDFNoter on another computer or phone, all interactive study notes are restored in their exact locations!
+                  The <strong>.pdfnoter package</strong> is a standalone bundle holding the PDF and all your hidden notes, attached pictures, highlights, and bookmarks. Anyone can import it back into PDFNoter with zero loss.
                 </span>
               </div>
 
               <div className="space-y-2.5 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 bg-white dark:bg-neutral-850">
                 <h3 className="text-xs font-semibold text-neutral-800 dark:text-neutral-100 uppercase tracking-wider">
-                  Package Contents
+                  Bundle Contents
                 </h3>
 
                 <label className="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300 cursor-pointer">
@@ -440,7 +669,7 @@ export function ExportShareModal({
                     onChange={(e) => setIncludeOriginalPdf(e.target.checked)}
                     className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                   />
-                  <span>Include original PDF document (standalone file-sharing)</span>
+                  <span>Include original PDF document</span>
                 </label>
 
                 <label className="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300 cursor-pointer">
@@ -450,7 +679,7 @@ export function ExportShareModal({
                     onChange={(e) => setIncludeNotes(e.target.checked)}
                     className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                   />
-                  <span>Include page-specific study notes ({notes.length})</span>
+                  <span>Include page notes ({notes.length} total)</span>
                 </label>
 
                 <label className="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300 cursor-pointer">
@@ -460,7 +689,7 @@ export function ExportShareModal({
                     onChange={(e) => setIncludeAnnotations(e.target.checked)}
                     className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                   />
-                  <span>Include text highlights & annotations ({annotations.length})</span>
+                  <span>Include text annotations ({annotations.length} total)</span>
                 </label>
 
                 <label className="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300 cursor-pointer">
@@ -470,35 +699,29 @@ export function ExportShareModal({
                     onChange={(e) => setIncludeBookmarks(e.target.checked)}
                     className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
                   />
-                  <span>Include bookmarks & reading progress ({bookmarks.length})</span>
+                  <span>Include bookmarks ({bookmarks.length} total)</span>
                 </label>
               </div>
 
-              <div className="pt-2 flex items-center justify-between">
-                <span className="text-[11px] text-neutral-400 dark:text-neutral-500">
-                  Compressed ZIP package (.pdfnoter)
-                </span>
-                <button
-                  type="button"
-                  onClick={handleExportStudyFile}
-                  disabled={isProcessing || !pdfFile}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white text-xs font-medium rounded-lg shadow-xs transition disabled:opacity-50"
-                >
-                  {isProcessing ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Download className="w-3.5 h-3.5" />
-                  )}
-                  <span>{isProcessing ? progressMessage || 'Packaging...' : 'Export .pdfnoter File'}</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleExportStudyFile}
+                disabled={isProcessing}
+                className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
+              >
+                {isProcessing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                <span>Download .pdfnoter Package</span>
+              </button>
             </div>
           )}
 
-          {/* TAB 3: Import PDFNoter Study File */}
+          {/* TAB 4: Import Study File */}
           {activeTab === 'import' && (
             <div className="space-y-4">
-              {/* Drag & Drop Zone */}
               {!importValidation ? (
                 <div
                   onDragOver={(e) => {
@@ -512,11 +735,6 @@ export function ExportShareModal({
                     const file = e.dataTransfer.files?.[0];
                     if (file) handleSelectImportFile(file);
                   }}
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition cursor-pointer ${
-                    isDraggingImport
-                      ? 'border-indigo-500 dark:border-indigo-400 bg-indigo-50/60 dark:bg-indigo-950/60'
-                      : 'border-neutral-300 dark:border-neutral-700 hover:border-indigo-400 dark:hover:border-indigo-500 bg-neutral-50/50 dark:bg-neutral-800/50'
-                  }`}
                   onClick={() => {
                     const input = document.createElement('input');
                     input.type = 'file';
@@ -527,30 +745,34 @@ export function ExportShareModal({
                     };
                     input.click();
                   }}
+                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition ${
+                    isDraggingImport
+                      ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30'
+                      : 'border-neutral-300 dark:border-neutral-700 hover:border-indigo-400 dark:hover:border-indigo-500 bg-neutral-50/50 dark:bg-neutral-850/50'
+                  }`}
                 >
-                  <FileUp className="w-8 h-8 text-indigo-500 dark:text-indigo-400 mx-auto mb-2" />
-                  <p className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
-                    Select a .pdfnoter file or drop it here
+                  <FileUp className="w-8 h-8 text-indigo-600 dark:text-indigo-400 mx-auto mb-2" />
+                  <p className="text-xs font-semibold text-neutral-800 dark:text-neutral-100">
+                    Click to select or drag and drop a .pdfnoter package
                   </p>
-                  <p className="text-[11px] text-neutral-400 dark:text-neutral-500 mt-1">
-                    Opens an exported study session with all original notes & highlights
+                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1">
+                    Restores the document and all associated notes, attached pictures & highlights
                   </p>
                 </div>
               ) : (
-                /* Inspection Summary Card */
-                <div className="p-4 bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-850 rounded-xl space-y-3">
+                <div className="p-4 bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-xl space-y-3 animate-in fade-in">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-xs font-bold text-indigo-950 dark:text-indigo-100">
-                        {importValidation.manifest?.document.fileName}
+                      <h4 className="text-xs font-bold text-neutral-900 dark:text-neutral-100">
+                        {importValidation.manifest?.documentFileName}
                       </h4>
-                      <p className="text-[11px] text-indigo-700 dark:text-indigo-300">
-                        Exported {new Date(importValidation.manifest?.exportedAt || '').toLocaleDateString()} • {importValidation.manifest?.document.pageCount} pages
+                      <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                        {importValidation.manifest?.exportedAt ? `Exported on ${new Date(importValidation.manifest.exportedAt).toLocaleDateString()}` : 'Ready to import'}
                       </p>
                     </div>
                     <button
                       onClick={() => setImportValidation(null)}
-                      className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 underline"
+                      className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 underline cursor-pointer"
                     >
                       Choose Different File
                     </button>
@@ -605,7 +827,7 @@ export function ExportShareModal({
                       type="button"
                       onClick={handleCommitImport}
                       disabled={isProcessing}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg shadow-xs transition disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg shadow-xs transition disabled:opacity-50 cursor-pointer"
                     >
                       {isProcessing ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
