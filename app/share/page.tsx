@@ -39,9 +39,15 @@ function SharePageContent() {
         setStatusMessage('Downloading study package & notes from cloud...');
         setProgressPercent(30);
 
-        // Fetch via server proxy to prevent client CORS blocks
-        const proxyUrl = `/api/share/fetch?url=${encodeURIComponent(src!)}`;
-        const response = await fetch(proxyUrl);
+        // Download shared package: try direct fetch first (files.catbox.moe supports CORS), fallback to proxy
+        let response: Response;
+        try {
+          response = await fetch(src!);
+          if (!response.ok) throw new Error(`Direct download status: ${response.status}`);
+        } catch {
+          const proxyUrl = `/api/share/fetch?url=${encodeURIComponent(src!)}`;
+          response = await fetch(proxyUrl);
+        }
 
         if (!response.ok) {
           throw new Error(`Failed to download shared package (status: ${response.status})`);

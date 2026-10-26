@@ -109,8 +109,8 @@ export async function compressAndProcessImage(
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Preserve PNG transparency if PNG, else JPEG for efficient compression
-        const outputMime = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+        // Use JPEG for efficient compression of photo & diagram attachments
+        const outputMime = file.type === 'image/webp' ? 'image/webp' : 'image/jpeg';
         const compressedDataUrl = canvas.toDataURL(outputMime, quality);
         resolve(compressedDataUrl);
       } catch {
@@ -120,5 +120,60 @@ export async function compressAndProcessImage(
     };
     img.onerror = () => reject(new Error('Invalid or corrupted image file'));
     img.src = rawDataUrl;
+  });
+}
+
+/**
+ * Compresses an existing base64 data URL to keep exported study packages lightweight.
+ */
+export async function compressDataUrl(
+  dataUrl: string,
+  maxWidth = 1000,
+  maxHeight = 1000,
+  quality = 0.75
+): Promise<string> {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return dataUrl;
+  }
+  if (!dataUrl || !dataUrl.startsWith('data:image/') || dataUrl.startsWith('data:image/svg+xml')) {
+    return dataUrl;
+  }
+  // If it's already lightweight (< 100KB), keep as-is
+  if (dataUrl.length < 100 * 1024) {
+    return dataUrl;
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        let width = img.naturalWidth || img.width;
+        let height = img.naturalHeight || img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve(dataUrl);
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressed = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressed);
+      } catch {
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
   });
 }

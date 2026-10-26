@@ -31,6 +31,7 @@ import type { StudyFileValidationResult } from '@/types/studyFile';
 import { exportAnnotatedStandardPdf } from '@/lib/export/pdfAnnotationExporter';
 import { exportStudyFile, downloadBlob } from '@/lib/export/studyFileExporter';
 import { validateStudyFile, commitStudyFileImport } from '@/lib/export/studyFileImporter';
+import { compressDataUrl } from '@/lib/utils/image';
 
 interface ExportShareModalProps {
   isOpen: boolean;
@@ -104,10 +105,33 @@ export function ExportShareModal({
     try {
       const buffer = await pdfFile.arrayBuffer();
 
+      // Optimize attached note images if present to ensure the package fits within cloud link limits
+      let exportNotes = includeNotes ? [...notes] : [];
+      const hasLargeImages = exportNotes.some(
+        (n) => n.imageUrl && n.imageUrl.startsWith('data:image/') && n.imageUrl.length > 70 * 1024
+      );
+
+      if (hasLargeImages) {
+        setProgressMessage('Optimizing attached note images for fast sharing...');
+        exportNotes = await Promise.all(
+          exportNotes.map(async (n) => {
+            if (n.imageUrl && n.imageUrl.startsWith('data:image/')) {
+              try {
+                const compressed = await compressDataUrl(n.imageUrl, 1000, 1000, 0.75);
+                return { ...n, imageUrl: compressed };
+              } catch {
+                return n;
+              }
+            }
+            return n;
+          })
+        );
+      }
+
       const blob = await exportStudyFile(
         buffer,
         documentRecord,
-        includeNotes ? notes : [],
+        exportNotes,
         includeAnnotations ? annotations : [],
         includeBookmarks ? bookmarks : [],
         readingProgress,
@@ -124,6 +148,15 @@ export function ExportShareModal({
         }
       );
 
+      // Check Vercel serverless function payload limit (~4.5MB)
+      const maxCloudBytes = 4.2 * 1024 * 1024;
+      if (blob.size > maxCloudBytes) {
+        const sizeMb = (blob.size / (1024 * 1024)).toFixed(1);
+        throw new Error(
+          `Document package is ${sizeMb}MB. Cloud link hosting supports up to 4.2MB. Please use the ".pdfnoter File" tab to download and share the full file directly.`
+        );
+      }
+
       setProgressPercent(50);
       setProgressMessage('Uploading study package to cloud storage...');
 
@@ -137,8 +170,19 @@ export function ExportShareModal({
       });
 
       if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || 'Failed to upload shared document');
+        let errorMsg = '';
+        try {
+          const errJson = await res.json();
+          errorMsg = errJson.error;
+        } catch {
+          const text = await res.text().catch(() => '');
+          if (res.status === 413) {
+            errorMsg = `Document package is too large for web link upload (${(blob.size / (1024 * 1024)).toFixed(1)}MB, max ~4.2MB). Please share using the ".pdfnoter File" tab.`;
+          } else if (text) {
+            errorMsg = text.slice(0, 120);
+          }
+        }
+        throw new Error(errorMsg || `Upload failed (status: ${res.status})`);
       }
 
       const data = await res.json();
